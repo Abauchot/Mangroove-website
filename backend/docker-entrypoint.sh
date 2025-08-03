@@ -10,4 +10,10 @@ if [ ! -f public/index.php ]; then
   composer require doctrine/doctrine-bundle
 fi
 
+# Assure que vendor/ est bien là
+if [ ! -d vendor ]; then
+  echo "Installation des dépendances..."
+  composer install
+fi
+
 php -S 0.0.0.0:8000 -t public
