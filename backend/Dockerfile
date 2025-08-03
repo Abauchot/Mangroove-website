@@ -11,6 +11,9 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash \
 
 WORKDIR /app
 
+COPY docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
+ENTRYPOINT ["/entrypoint.sh"]
