@@ -13,27 +13,7 @@ git clone git@github.com:G8ite/Mangroove-website.git
 cd Mangroove-website
 ```
 
-### 2. Initialiser les projets
-
-> Cette étape n'est à faire qu'une seule fois par machine ou après suppression des dossiers `backend/` ou `frontend/`.
-
-#### Backend (Symfony)
-
-```bash
-rm -rf backend/*
-docker run --rm -it -v $(pwd)/backend:/app -w /app composer create-project symfony/skeleton .
-```
-
-#### Frontend (Vue + PrimeVue)
-
-```bash
-rm -rf frontend/*
-docker compose run --rm frontend
-```
-
-Cela va créer un projet Vue automatiquement.
-
-### 3. Lancer l'environnement
+### 2. Lancer l'environnement (build + initialisation automatique)
 
 ```bash
 docker compose up --build
@@ -48,8 +28,8 @@ docker compose up --build
 
 ```
 Mangroove-website/
-├── backend/       # Symfony + API Platform
-├── frontend/      # Vue 3 + PrimeVue
+├── backend/       # Symfony + API Platform (initialisé automatiquement)
+├── frontend/      # Vue 3 + PrimeVue (initialisé automatiquement)
 ├── docker-compose.yml
 ```
 
@@ -97,4 +77,4 @@ Mangroove-website/
 
 ## ⚖️ Licences
 
-A réfléchir
+à réfléchir
