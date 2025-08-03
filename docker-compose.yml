@@ -1,0 +1,35 @@
+services:
+  backend:
+    build: ./backend
+    container_name: mangroove_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "pgsql://symfony:symfony@db:5432/mangroove"
+
+  frontend:
+    build: ./frontend
+    container_name: mangroove_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15
+    container_name: mangroove_db
+    environment:
+      POSTGRES_DB: mangroove
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: symfony
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
