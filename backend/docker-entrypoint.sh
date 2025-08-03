@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Si Symfony n’est pas encore installé, on l’installe
 if [ ! -f public/index.php ]; then
   echo "Symfony non initialisé, création du projet..."
   composer create-project symfony/skeleton . --no-interaction
@@ -10,9 +11,9 @@ if [ ! -f public/index.php ]; then
   composer require doctrine/doctrine-bundle
 fi
 
-# Assure que vendor/ est bien là
+# Si vendor/ est absent (clone partiel), on installe les dépendances
 if [ ! -d vendor ]; then
-  echo "Installation des dépendances..."
+  echo "Installation des dépendances Composer..."
   composer install
 fi
 
