@@ -57,38 +57,28 @@ Le backend Symfony est prêt à l'emploi avec l'authentification par JWT déjà 
 
 ### Modifier le code Symfony
 
-1. Ouvrir un shell dans le container backend :
+#### 🖥️ Génération de fichiers Symfony (en local uniquement)
+
+Les commandes suivantes doivent être exécutées **en local**, pour garantir que les fichiers générés (entités, contrôleurs, etc.) soient bien présents dans le dossier `backend/` et versionnables :
+
+```bash
+php bin/console make:entity
+php bin/console make:controller
+php bin/console make:user
+php bin/console make:form
+php bin/console make:migration
+```
+
+#### 🐘 Commandes liées à la base de données (à exécuter dans Docker)
+
+Ces commandes doivent être exécutées **dans le container**, car la base PostgreSQL n’est accessible que dans le réseau Docker (host `db`) :
 
 ```bash
 docker compose exec backend bash
+php bin/console doctrine:migrations:migrate
 ```
 
-2. Utiliser les commandes Symfony :
-
-* Générer une entité :
-
-  ```bash
-  php bin/console make:entity
-  ```
-* Générer une migration Doctrine :
-
-  ```bash
-  php bin/console make:migration
-  ```
-* Appliquer les migrations :
-
-  ```bash
-  php bin/console doctrine:migrations:migrate
-  ```
-* Autres commandes utiles :
-
-  ```bash
-  php bin/console make:controller
-  php bin/console make:user
-  php bin/console make:form
-  ```
-
-> ℹ️ Toutes les modifications faites dans le container seront bien enregistrées dans `backend/` et visibles dans Git.
+> ⚠️ Ne pas générer de fichiers dans le container (sinon ils ne seront pas visibles depuis le repo Git).
 
 ### ⚠️ Ne pas recréer Symfony dans Docker
 
