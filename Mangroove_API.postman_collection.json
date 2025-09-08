@@ -1,0 +1,305 @@
+{
+	"info": {
+		"name": "Mangroove API",
+		"description": "Collection Postman pour l'API Mangroove avec authentification JWT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Authentification",
+			"item": [
+				{
+					"name": "Login - Obtenir JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extraire automatiquement le token JWT et le stocker",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.token) {",
+									"        pm.collectionVariables.set('jwt_token', responseJson.token);",
+									"        console.log('✅ Token JWT sauvegardé automatiquement');",
+									"    }",
+									"} else {",
+									"    console.log('❌ Échec de l\\'authentification');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@mangroove.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "Authentification pour obtenir un token JWT.\n\n**Utilisateur de test :**\n- Email: user@mangroove.com\n- Password: password123\n\n⚡ Le token sera automatiquement sauvegardé pour les autres requêtes."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Créer un compte",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nouveau@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "Créer un nouveau compte utilisateur."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints d'authentification pour obtenir et gérer les tokens JWT."
+		},
+		{
+			"name": "👥 Users API",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Récupérer la liste de tous les utilisateurs.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"1"
+							]
+						},
+						"description": "Récupérer un utilisateur spécifique par son ID.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/ld+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nouvel.user@example.com\",\n  \"password\": \"motdepasse123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Créer un nouvel utilisateur via l'API Platform.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"email.modifie@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"1"
+							]
+						},
+						"description": "Mettre à jour un utilisateur existant.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"1"
+							]
+						},
+						"description": "Supprimer un utilisateur.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer les utilisateurs via API Platform."
+		},
+		{
+			"name": "📋 API Documentation",
+			"item": [
+				{
+					"name": "API Entrypoint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api"
+							]
+						},
+						"description": "Point d'entrée de l'API Platform.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "OpenAPI Documentation (JSON)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/docs.json",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"docs.json"
+							]
+						},
+						"description": "Documentation OpenAPI au format JSON."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour accéder à la documentation de l'API."
+		}
+	]
+}

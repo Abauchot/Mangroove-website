@@ -37,7 +37,19 @@ Mangroove-website/
 
 ---
 
-## 📖 Documentation utile
+## � Collection Postman
+
+**Collection prête à l'emploi pour tester l'API :**
+
+1. **Importer** : `Mangroove_API.postman_collection.json`
+2. **Environnement** : `Mangroove_Local.postman_environment.json`
+3. **Guide complet** : [POSTMAN_GUIDE.md](POSTMAN_GUIDE.md)
+
+> ⚡ **Authentification automatique** : Le token JWT est géré automatiquement !
+
+---
+
+## �📖 Documentation utile
 
 * Symfony : [https://symfony.com/doc](https://symfony.com/doc)
 * API Platform : [https://api-platform.com/docs/](https://api-platform.com/docs/)
