@@ -10,6 +10,8 @@ services:
       - db
     environment:
       DATABASE_URL: "pgsql://symfony:symfony@db:5432/mangroove"
+      DATABASE_TEST_URL: "pgsql://symfony:symfony@db:5432/mangroove_test"
+      APP_ENV: dev
 
   frontend:
     build: ./frontend

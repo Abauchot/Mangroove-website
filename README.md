@@ -100,6 +100,60 @@ Le projet Symfony a été initialisé une fois en local (PHP + Composer), puis v
 
 ---
 
+## 🧪 Tests
+
+Le projet est configuré avec PHPUnit et prêt pour les tests. L'environnement de test est préparé automatiquement lors de l'exécution des tests.
+
+### Exécuter les tests
+
+#### Option 1 : Script rapide (recommandé)
+
+```bash
+./run-tests.sh
+```
+
+#### Option 2 : Commande Docker directe
+
+```bash
+# Tous les tests
+docker compose exec -e APP_ENV=test backend vendor/bin/phpunit
+
+# Tests spécifiques
+docker compose exec -e APP_ENV=test backend vendor/bin/phpunit tests/Controller/RegisterControllerTest.php
+
+# Tests avec détails
+docker compose exec -e APP_ENV=test backend vendor/bin/phpunit --verbose
+```
+
+### Configuration automatique des tests
+
+Le script `./run-tests.sh` configure automatiquement :
+
+* ✅ Base de données de test (`mangroove_test`)
+* ✅ Schéma de base de données pour les tests
+* ✅ Environnement de test PHPUnit
+
+### Structure des tests
+
+```text
+backend/tests/
+├── Controller/
+│   └── RegisterControllerTest.php  # Tests d'API
+└── bootstrap.php                   # Configuration PHPUnit
+```
+
+### Développement de nouveaux tests
+
+```bash
+# Accéder au container pour développer
+docker compose exec backend bash
+
+# Créer un nouveau test
+vendor/bin/phpunit --generate-test src/Controller/MonController.php
+```
+
+---
+
 ## ⚡ Tips
 
 * Pour reconstruire un service :
