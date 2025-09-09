@@ -44,6 +44,16 @@
 			"key": "jwt_token",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "jam_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -161,22 +171,42 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/users/1",
+							"raw": "{{base_url}}/api/users/{{user_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"users",
-								"1"
+								"{{user_id}}"
 							]
 						},
-						"description": "Récupérer un utilisateur spécifique par son ID.\n\n🔒 **Authentification requise**"
+						"description": "Récupérer un utilisateur spécifique par son ID UUID.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{user_id}} ou remplacez par un UUID valide."
 					},
 					"response": []
 				},
 				{
 					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extraire automatiquement l'ID de l'utilisateur créé et le stocker",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.id) {",
+									"        pm.collectionVariables.set('user_id', responseJson.id);",
+									"        console.log('✅ ID de l\\'utilisateur sauvegardé automatiquement: ' + responseJson.id);",
+									"    }",
+									"} else {",
+									"    console.log('❌ Échec de la création de l\\'utilisateur');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -199,7 +229,7 @@
 								"users"
 							]
 						},
-						"description": "Créer un nouvel utilisateur via l'API Platform.\n\n🔒 **Authentification requise**"
+						"description": "Créer un nouvel utilisateur via l'API Platform.\n\n🔒 **Authentification requise**\n\n⚡ L'ID de l'utilisateur sera automatiquement sauvegardé pour les autres requêtes."
 					},
 					"response": []
 				},
@@ -218,17 +248,17 @@
 							"raw": "{\n  \"email\": \"email.modifie@example.com\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/users/1",
+							"raw": "{{base_url}}/api/users/{{user_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"users",
-								"1"
+								"{{user_id}}"
 							]
 						},
-						"description": "Mettre à jour un utilisateur existant.\n\n🔒 **Authentification requise**"
+						"description": "Mettre à jour un utilisateur existant.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{user_id}} ou remplacez par un UUID valide."
 					},
 					"response": []
 				},
@@ -238,22 +268,216 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/users/1",
+							"raw": "{{base_url}}/api/users/{{user_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"users",
-								"1"
+								"{{user_id}}"
 							]
 						},
-						"description": "Supprimer un utilisateur.\n\n🔒 **Authentification requise**"
+						"description": "Supprimer un utilisateur.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{user_id}} ou remplacez par un UUID valide.\n\n⚠️ **Attention :** Cette action est irréversible."
 					},
 					"response": []
 				}
 			],
 			"description": "Endpoints pour gérer les utilisateurs via API Platform."
+		},
+		{
+			"name": "🎯 Jams API",
+			"item": [
+				{
+					"name": "Get All Jams",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							]
+						},
+						"description": "Récupérer la liste de toutes les jams.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jams by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams?status=published",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "published",
+									"description": "Filtrer par statut (draft, published, active, completed, cancelled)"
+								}
+							]
+						},
+						"description": "Filtrer les jams par statut.\n\n🔒 **Authentification requise**\n\n📋 **Statuts disponibles :**\n- draft: Brouillon\n- published: Publiée\n- active: En cours\n- completed: Terminée\n- cancelled: Annulée"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jam by Slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams?slug=nouvelle-game-jam-2025",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							],
+							"query": [
+								{
+									"key": "slug",
+									"value": "nouvelle-game-jam-2025",
+									"description": "Rechercher par slug (identifiant URL-friendly)"
+								}
+							]
+						},
+						"description": "Rechercher une jam par son slug.\n\n🔒 **Authentification requise**\n\n💡 Le slug est l'identifiant URL-friendly de la jam."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jam by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}"
+							]
+						},
+						"description": "Récupérer une jam spécifique par son ID UUID.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{jam_id}} ou remplacez par un UUID valide."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Jam",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extraire automatiquement l'ID de la jam créée et le stocker",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.id) {",
+									"        pm.collectionVariables.set('jam_id', responseJson.id);",
+									"        console.log('✅ ID de la jam sauvegardé automatiquement: ' + responseJson.id);",
+									"    }",
+									"} else {",
+									"    console.log('❌ Échec de la création de la jam');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/ld+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Nouvelle Game Jam 2025\",\n  \"slug\": \"nouvelle-game-jam-2025\",\n  \"startsAt\": \"2025-12-01T09:00:00+00:00\",\n  \"endsAt\": \"2025-12-03T23:59:59+00:00\",\n  \"votingEndAt\": \"2025-12-10T23:59:59+00:00\",\n  \"themeSubmissionEndAt\": \"2025-11-25T23:59:59+00:00\",\n  \"themeVotingEndAt\": \"2025-11-30T23:59:59+00:00\",\n  \"theme\": \"Innovation\",\n  \"status\": \"draft\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jams",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							]
+						},
+						"description": "Créer une nouvelle jam.\n\n🔒 **Authentification requise**\n\n📝 **Champs requis :**\n- title: Titre de la jam\n- slug: Identifiant unique URL-friendly\n- startsAt: Date de début\n- endsAt: Date de fin\n- votingEndAt: Date de fin des votes\n- themeSubmissionEndAt: Date limite soumission de thèmes\n- themeVotingEndAt: Date limite vote des thèmes\n\n📝 **Champs optionnels :**\n- theme: Thème de la jam (peut être défini plus tard)\n- status: Statut (draft par défaut)\n\n📅 **Format des dates :** ISO 8601 (YYYY-MM-DDTHH:MM:SS+00:00)\n\n⚡ L'ID de la jam sera automatiquement sauvegardé pour les autres requêtes."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Jam",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Game Jam 2025 - Titre Modifié\",\n  \"theme\": \"Nouveau Thème\",\n  \"status\": \"published\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}"
+							]
+						},
+						"description": "Mettre à jour une jam existante.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{jam_id}} ou remplacez par un UUID valide.\n\n📝 Vous pouvez modifier partiellement les champs de la jam."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Jam",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}"
+							]
+						},
+						"description": "Supprimer une jam.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{jam_id}} ou remplacez par un UUID valide.\n\n⚠️ **Attention :** Cette action est irréversible."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer les jams (game jams) via API Platform."
 		},
 		{
 			"name": "📋 API Documentation",
