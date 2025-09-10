@@ -20,6 +20,12 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\HasLifecycleCallbacks]
 class Jam
 {
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PUBLISHED = 'published';
+    public const STATUS_RUNNING = 'running';
+    public const STATUS_CLOSED = 'closed';
+
+
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     #[Groups(['jam:read'])]
@@ -72,6 +78,7 @@ class Jam
     public function __construct()
     {
         $this->id = Uuid::v4();
+        $this->status = self::STATUS_DRAFT;
     }
 
     #[ORM\PrePersist]
@@ -195,8 +202,18 @@ class Jam
 
     public function setStatus(string $status): static
     {
-        $this->status = $status;
+        $allowedStatuses = [
+            self::STATUS_DRAFT,
+            self::STATUS_PUBLISHED,
+            self::STATUS_RUNNING,
+            self::STATUS_CLOSED,
+        ];
 
+        if (!in_array($status, $allowedStatuses, true)) {
+            throw new \InvalidArgumentException(sprintf('Invalid status "%s"', $status));
+        }
+
+        $this->status = $status;
         return $this;
     }
 
