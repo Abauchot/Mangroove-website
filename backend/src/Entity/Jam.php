@@ -24,6 +24,7 @@ class Jam
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_RUNNING = 'running';
     public const STATUS_CLOSED = 'closed';
+    public const STATUS_ARCHIVED = 'archived';
 
 
     #[ORM\Id]
@@ -207,6 +208,7 @@ class Jam
             self::STATUS_PUBLISHED,
             self::STATUS_RUNNING,
             self::STATUS_CLOSED,
+            self::STATUS_ARCHIVED,
         ];
 
         if (!in_array($status, $allowedStatuses, true)) {
