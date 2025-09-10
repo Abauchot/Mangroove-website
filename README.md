@@ -58,6 +58,86 @@ Mangroove-website/
 
 ---
 
+## 🎮 Cycle de vie d'une GameJam
+
+Mangroove gère le cycle de vie complet d'une GameJam à travers 5 statuts distincts et des endpoints API dédiés pour chaque transition.
+
+### 📊 Statuts disponibles
+
+| Statut | Description | Actions possibles |
+|--------|-------------|-------------------|
+| `draft` | Brouillon - Jam en cours de création | Modification, Publication |
+| `published` | Publié - Jam annoncée publiquement | Démarrage, Retour en brouillon |
+| `running` | En cours - Soumissions ouvertes | Fermeture |
+| `closed` | Fermé - Votes en cours, soumissions fermées | Archivage |
+| `archived` | Archivé - Résultats publiés, jam terminée | Aucune (état final) |
+
+### 🔄 Flux de transitions
+
+```text
+DRAFT → PUBLISHED → RUNNING → CLOSED → ARCHIVED
+  ↓         ↓          ↓         ↓         ↓
+Création  Annonce   Soumissions  Votes   Résultats
+         publique   ouvertes   ouverts  publiés
+```
+
+### 🛠️ Endpoints API
+
+#### 1. Publier une Jam
+
+```http
+POST /api/jams/{id}/publish
+```
+
+* **Transition :** `draft` → `published`
+* **Description :** Publie la jam et la rend visible au public
+
+#### 2. Démarrer une Jam
+
+```http
+POST /api/jams/{id}/start
+```
+
+* **Transition :** `published` → `running`
+* **Description :** Ouvre officiellement les soumissions
+
+#### 3. Fermer une Jam
+
+```http
+POST /api/jams/{id}/close
+```
+
+* **Transition :** `running` → `closed`
+* **Description :** Ferme les soumissions et ouvre les votes
+
+#### 4. Archiver une Jam
+
+```http
+POST /api/jams/{id}/archive
+```
+
+* **Transition :** `closed` → `archived`
+* **Description :** Archive définitivement la jam après publication des résultats
+
+### ✅ Validation des transitions
+
+Chaque endpoint valide que la jam est dans le bon état avant d'effectuer la transition :
+
+* ❌ **Erreur 400** : Transition invalide (mauvais statut actuel)
+* ❌ **Erreur 404** : Jam inexistante
+* ✅ **Succès 200** : Transition effectuée
+
+### 🧪 Tests unitaires
+
+Tous les contrôleurs sont testés avec PHPUnit :
+
+```bash
+# Tester tous les contrôleurs de cycle de vie
+docker compose exec -e APP_ENV=test backend vendor/bin/phpunit --filter "JamPublishingControllerTest|JamStartControllerTest|JamCloseControllerTest|JamArchiveControllerTest"
+```
+
+---
+
 ## 🔧 Pour les développeurs backend
 
 Le backend Symfony est prêt à l'emploi avec l'authentification par JWT déjà en place (inscription, login). Tous les fichiers Symfony sont versionnés, y compris :
