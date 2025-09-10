@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\JamRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
@@ -76,10 +78,15 @@ class Jam
     #[Groups(['jam:read'])]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\OneToMany(targetEntity: GameEntry::class, mappedBy: 'jam', orphanRemoval: true)]
+    #[Groups(['jam:read'])]
+    private Collection $gameEntries;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->status = self::STATUS_DRAFT;
+        $this->gameEntries = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -239,6 +246,36 @@ class Jam
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GameEntry>
+     */
+    public function getGameEntries(): Collection
+    {
+        return $this->gameEntries;
+    }
+
+    public function addGameEntry(GameEntry $gameEntry): static
+    {
+        if (!$this->gameEntries->contains($gameEntry)) {
+            $this->gameEntries->add($gameEntry);
+            $gameEntry->setJam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGameEntry(GameEntry $gameEntry): static
+    {
+        if ($this->gameEntries->removeElement($gameEntry)) {
+            // set the owning side to null (unless already changed)
+            if ($gameEntry->getJam() === $this) {
+                $gameEntry->setJam(null);
+            }
+        }
 
         return $this;
     }
