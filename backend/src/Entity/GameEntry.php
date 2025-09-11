@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\GameEntryRepository;
 use Doctrine\DBAL\Types\Types;
@@ -70,11 +72,18 @@ class GameEntry
     #[Groups(['game_entry:read'])]
     private ?\DateTimeInterface $updatedAt = null;
 
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'gameEntry')]
+    private Collection $comments;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->mediaUrls = [];
         $this->tags = [];
+        $this->comments = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -255,6 +264,36 @@ class GameEntry
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setGameEntry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getGameEntry() === $this) {
+                $comment->setGameEntry(null);
+            }
+        }
 
         return $this;
     }

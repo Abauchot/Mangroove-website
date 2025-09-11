@@ -212,10 +212,48 @@ POST /api/jams/{{jam_id}}/archive
 3. **Publier la jam** → `POST /api/jams/{{jam_id}}/publish`
 4. **Démarrer la jam** → `POST /api/jams/{{jam_id}}/start`
 5. **Soumettre un jeu** → `POST /api/game_entries`
-6. **Modifier sa soumission** → `PUT /api/game_entries/{{game_entry_id}}`
-7. **Fermer la jam** → `POST /api/jams/{{jam_id}}/close`
-8. **Voir les soumissions** → `GET /api/game_entries?jam={{jam_id}}`
-9. **Archiver la jam** → `POST /api/jams/{{jam_id}}/archive`
+6. **📝 Commenter un jeu** → `POST /api/comments`
+7. **📖 Lire les commentaires** → `GET /api/comments?gameEntry={{game_entry_id}}`
+8. **✏️ Modifier son commentaire** → `PATCH /api/comments/{{comment_id}}`
+9. **Modifier sa soumission** → `PUT /api/game_entries/{{game_entry_id}}`
+10. **Fermer la jam** → `POST /api/jams/{{jam_id}}/close`
+11. **Voir les soumissions** → `GET /api/game_entries?jam={{jam_id}}`
+12. **Archiver la jam** → `POST /api/jams/{{jam_id}}/archive`
+
+## 💬 API Comments
+
+### Opérations disponibles
+- **GET** `/api/comments` - Liste tous les commentaires accessibles
+- **GET** `/api/comments?gameEntry={{game_entry_id}}` - Commentaires d'un jeu
+- **GET** `/api/comments/{id}` - Récupère un commentaire par ID
+- **POST** `/api/comments` - Crée un nouveau commentaire
+- **PATCH** `/api/comments/{id}` - Met à jour son commentaire
+- **DELETE** `/api/comments/{id}` - Supprime un commentaire
+
+### Permissions
+| **Action** | **USER** | **MODERATOR** | **ADMIN** |
+|------------|----------|---------------|-----------|
+| Voir commentaires | ✅ | ✅ | ✅ |
+| Créer commentaire | ✅ | ✅ | ✅ |
+| Modifier son commentaire | ✅ (15 min) | ✅ | ✅ |
+| Supprimer son commentaire | ✅ | ✅ | ✅ |
+| Supprimer commentaire d'autrui | ❌ | ✅ (ses jams) | ✅ (tous) |
+| Modérer commentaires | ❌ | ✅ | ✅ |
+
+### Exemple de création
+```json
+{
+  "content": "Super jeu ! J'adore le gameplay. 🎮",
+  "gameEntry": "/api/game_entries/{{game_entry_id}}"
+}
+```
+
+### Règles métier
+✅ **Autorisé :** Commenter tout jeu public
+❌ **Interdit :** Modifier après 15 minutes (sauf admin/modo)
+🔒 **Sécurité :** L'auteur est automatiquement défini
+
+## 🛠️ Workflow complet
 
 **❌ 401 Unauthorized**
 - Vérifiez que vous êtes connecté (Login)

@@ -29,7 +29,7 @@ class JamVoter extends Voter
     {
         $user = $token->getUser();
 
-        // L'utilisateur doit être connecté
+        // user must be logged in; if not, deny access
         if (!$user instanceof User) {
             return false;
         }
@@ -51,23 +51,23 @@ class JamVoter extends Voter
 
     private function canView(Jam $jam, User $user): bool
     {
-        // Tout le monde peut voir les jams publiées
+        // Everyone can view published jams
         if ($jam->getStatus() !== 'draft') {
             return true;
         }
 
-        // Seuls les modérateurs+ peuvent voir les brouillons
+        // Only moderators+ can view drafts
         return $user->isModerator();
     }
 
     private function canEdit(Jam $jam, User $user): bool
     {
-        // Admin peut tout modifier
+        // Admin can edit everything
         if ($user->isAdmin()) {
             return true;
         }
 
-        // Modérateur peut modifier ses propres jams
+        // Moderator can edit their own jams
         if ($user->isModerator() && $jam->getCreatedBy() === $user) {
             return true;
         }
@@ -77,18 +77,18 @@ class JamVoter extends Voter
 
     private function canDelete(Jam $jam, User $user): bool
     {
-        // Même logique que l'édition
+        // Same logic as editing
         return $this->canEdit($jam, $user);
     }
 
     private function canManageLifecycle(Jam $jam, User $user): bool
     {
-        // Admin peut gérer le cycle de vie de toutes les jams
+        // Admin can manage the lifecycle of all jams
         if ($user->isAdmin()) {
             return true;
         }
 
-        // Modérateur peut gérer le cycle de vie de ses propres jams
+        // Moderator can manage the lifecycle of their own jams
         if ($user->isModerator() && $jam->getCreatedBy() === $user) {
             return true;
         }
