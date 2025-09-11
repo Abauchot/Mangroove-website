@@ -3,6 +3,11 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
@@ -14,7 +19,14 @@ use Symfony\Component\Uid\Uuid;
 #[ApiResource(
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
-    security: "is_granted('IS_AUTHENTICATED_FULLY')"
+    security: "is_granted('IS_AUTHENTICATED_FULLY')",
+    operations: [
+        new \ApiPlatform\Metadata\Get(security: "is_granted('ROLE_MODERATOR') or object == user"),
+        new \ApiPlatform\Metadata\GetCollection(security: "is_granted('ROLE_MODERATOR')"),
+        new \ApiPlatform\Metadata\Post(security: "is_granted('PUBLIC_ACCESS')", denormalizationContext: ['groups' => ['user:create']]),
+        new \ApiPlatform\Metadata\Patch(security: "is_granted('ROLE_ADMIN') or object == user"),
+        new \ApiPlatform\Metadata\Delete(security: "is_granted('ROLE_ADMIN') or object == user"),
+    ]
 )]
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -33,14 +45,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'user:create'])]
     private ?string $email = null;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column(name: 'password_hash')]
-    #[Groups(['user:write'])]
+    #[Groups(['user:write', 'user:create'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 100, nullable: true)]
@@ -62,21 +74,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column]
-    #[Groups(['user:read'])]
-    private array $roles = [];
+
+    const ROLE_USER = 'ROLE_USER';
+    const ROLE_ADMIN = 'ROLE_ADMIN';
+    const ROLE_MODERATOR = 'ROLE_MODERATOR';
+    
+    #[ORM\Column(type: Types::JSON)]
+    #[Groups(['user:read'])] 
+    private array $roles = ['ROLE_USER'];
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['user:read'])]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['user:read'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     public function __construct()
     {
         $this->id = Uuid::v4();
+        $this->roles = [self::ROLE_USER];
     }
 
     #[ORM\PrePersist]
@@ -184,8 +200,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setRoles(array $roles): static
     {
-        $this->roles = $roles;
+        // validation of allowed roles
+        $validRoles = [self::ROLE_USER, self::ROLE_MODERATOR, self::ROLE_ADMIN];
+        $filteredRoles = array_filter($roles, fn($role) => in_array($role, $validRoles));
 
+        // Ensure at least ROLE_USER is present
+        if (!in_array(self::ROLE_USER, $filteredRoles)) {
+            $filteredRoles[] = self::ROLE_USER;
+        }
+        
+        $this->roles = array_unique($filteredRoles);
+        
         return $this;
     }
 
@@ -198,6 +223,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->password = $password;
 
+        return $this;
+    }
+
+    /**
+     * check what roles the user has
+     */
+    public function isAdmin(): bool
+    {
+        return in_array(self::ROLE_ADMIN, $this->roles);
+    }
+
+    public function isModerator(): bool
+    {
+        return in_array(self::ROLE_MODERATOR, $this->roles) || $this->isAdmin();
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->getRoles());
+    }
+
+    /**
+     * add role in a secure way
+     */
+    public function addRole(string $role): static
+    {
+        $validRoles = [self::ROLE_USER, self::ROLE_MODERATOR, self::ROLE_ADMIN];
+        
+        if (in_array($role, $validRoles) && !in_array($role, $this->roles)) {
+            $this->roles[] = $role;
+        }
+        
+        return $this;
+    }
+
+    /**
+     * remove role in a secure way (cannot remove ROLE_USER)
+     */
+    public function removeRole(string $role): static
+    {
+        if ($role !== self::ROLE_USER) {
+            $this->roles = array_filter($this->roles, fn($r) => $r !== $role);
+        }
+        
         return $this;
     }
 

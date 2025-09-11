@@ -138,6 +138,98 @@ docker compose exec -e APP_ENV=test backend vendor/bin/phpunit --filter "JamPubl
 
 ---
 
+## 🎭 Matrice des rôles
+
+Mangroove implémente un système de rôles hiérarchique pour gérer les permissions sur la plateforme de GameJam.
+
+### 📊 Hiérarchie des rôles
+
+```text
+ADMIN > MODERATOR > USER
+```
+
+### 👥 Gestion des Utilisateurs
+
+| **Action** | **USER** | **MODERATOR** | **ADMIN** |
+|------------|----------|---------------|-----------|
+| Voir son profil | ✅ | ✅ | ✅ |
+| Modifier son profil | ✅ | ✅ | ✅ |
+| Supprimer son compte | ✅ | ✅ | ✅ |
+| Lister tous les utilisateurs | ❌ | ✅ | ✅ |
+| Voir profil d'un autre utilisateur | ❌ | ✅ | ✅ |
+| Modifier un autre utilisateur | ❌ | ❌ | ✅ |
+| Supprimer un autre utilisateur | ❌ | ❌ | ✅ |
+| Promouvoir/Rétrograder | ❌ | ❌ | ✅ |
+
+### 🎯 Gestion des Jams
+
+| **Action** | **USER** | **MODERATOR** | **ADMIN** |
+|------------|----------|---------------|-----------|
+| Voir toutes les jams | ✅ | ✅ | ✅ |
+| Voir détail d'une jam | ✅ | ✅ | ✅ |
+| Filtrer par statut/slug | ✅ | ✅ | ✅ |
+| **Création** | | | |
+| Créer une jam | ❌ | ✅ | ✅ |
+| **Modifications** | | | |
+| Modifier une jam | ❌ | ✅ (ses jams) | ✅ (toutes) |
+| Supprimer une jam | ❌ | ✅ (ses jams) | ✅ (toutes) |
+| **Cycle de vie** | | | |
+| Publier (`draft` → `published`) | ❌ | ✅ (ses jams) | ✅ (toutes) |
+| Démarrer (`published` → `running`) | ❌ | ✅ (ses jams) | ✅ (toutes) |
+| Fermer (`running` → `closed`) | ❌ | ✅ (ses jams) | ✅ (toutes) |
+| Archiver (`closed` → `archived`) | ❌ | ✅ (ses jams) | ✅ (toutes) |
+
+### 🎮 Gestion des GameEntry (Soumissions)
+
+| **Action** | **USER** | **MODERATOR** | **ADMIN** |
+|------------|----------|---------------|-----------|
+| Voir soumissions d'une jam | ✅ | ✅ | ✅ |
+| Soumettre un jeu | ✅ | ✅ | ✅ |
+| Modifier sa soumission | ✅ (pendant `running`) | ✅ | ✅ |
+| Supprimer sa soumission | ✅ (pendant `running`) | ✅ | ✅ |
+| Modifier soumission d'autrui | ❌ | ✅ | ✅ |
+| Supprimer soumission d'autrui | ❌ | ✅ | ✅ |
+
+### 🏆 Gestion des Votes et Évaluations
+
+| **Action** | **USER** | **MODERATOR** | **ADMIN** |
+|------------|----------|---------------|-----------|
+| Voter pour un jeu | ✅ (pendant `closed`) | ✅ | ✅ |
+| Voir résultats | ✅ | ✅ | ✅ |
+| Modifier votes d'autrui | ❌ | ❌ | ✅ |
+| Publier résultats | ❌ | ✅ (ses jams) | ✅ (toutes) |
+
+### 🛠️ Administration
+
+| **Action** | **USER** | **MODERATOR** | **ADMIN** |
+|------------|----------|---------------|-----------|
+| Voir logs système | ❌ | ❌ | ✅ |
+| Configurer API | ❌ | ❌ | ✅ |
+| Gestion base de données | ❌ | ❌ | ✅ |
+| Backup/Restore | ❌ | ❌ | ✅ |
+
+### 🔧 Implémentation
+
+#### Rôles dans l'entité User
+
+```php
+const ROLE_USER = 'ROLE_USER';
+const ROLE_MODERATOR = 'ROLE_MODERATOR';
+const ROLE_ADMIN = 'ROLE_ADMIN';
+
+#[ORM\Column(type: 'json')]
+private array $roles = ['ROLE_USER'];
+```
+
+#### Principes de sécurité
+
+* **Principe du moindre privilège** : Tout est interdit par défaut
+* **Escalade progressive** : USER → MODERATOR → ADMIN
+* **Propriétaire** : Un modérateur peut gérer ses propres jams
+* **Audit trail** : Logs pour toutes les actions sensibles
+
+---
+
 ## 🔧 Pour les développeurs backend
 
 Le backend Symfony est prêt à l'emploi avec l'authentification par JWT déjà en place (inscription, login). Tous les fichiers Symfony sont versionnés, y compris :

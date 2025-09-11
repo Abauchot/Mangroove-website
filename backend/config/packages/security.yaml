@@ -1,4 +1,10 @@
 security:
+    # Role hierarchy: higher roles automatically inherit permissions from lower roles
+    # MODERATOR inherits USER permissions, ADMIN inherits both MODERATOR and USER permissions
+    role_hierarchy:
+        ROLE_MODERATOR: ROLE_USER        # Moderators can do everything users can do
+        ROLE_ADMIN: [ROLE_MODERATOR, ROLE_USER]  # Admins inherit all permissions
+
     password_hashers:
         App\Entity\User:
             algorithm: auto
