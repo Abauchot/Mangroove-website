@@ -51,7 +51,12 @@
 			"type": "string"
 		},
 		{
-			"key": "user_id",
+			"key": "user_id", 
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "game_entry_id",
 			"value": "",
 			"type": "string"
 		}
@@ -480,7 +485,238 @@
 			"description": "Endpoints pour gérer les jams (game jams) via API Platform."
 		},
 		{
-			"name": "📋 API Documentation",
+			"name": "� Cycle de vie des Jams",
+			"item": [
+				{
+					"name": "Publier une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/publish",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"publish"
+							]
+						},
+						"description": "Publier une jam (transition draft → published).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'draft'\n\n📋 **Réponse :** Message de confirmation"
+					},
+					"response": []
+				},
+				{
+					"name": "Démarrer une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"start"
+							]
+						},
+						"description": "Démarrer une jam (transition published → running).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'published'\n\n📋 **Action :** Ouvre les soumissions de jeux"
+					},
+					"response": []
+				},
+				{
+					"name": "Fermer une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/close",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"close"
+							]
+						},
+						"description": "Fermer une jam (transition running → closed).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'running'\n\n📋 **Action :** Ferme les soumissions, ouvre les votes"
+					},
+					"response": []
+				},
+				{
+					"name": "Archiver une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/archive",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"archive"
+							]
+						},
+						"description": "Archiver une jam (transition closed → archived).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'closed'\n\n📋 **Action :** Archive définitivement la jam"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer le cycle de vie complet d'une jam : draft → published → running → closed → archived"
+		},
+		{
+			"name": "🎮 GameEntry (Soumissions)",
+			"item": [
+				{
+					"name": "Lister les GameEntry d'une Jam",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/game_entries?jam={{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries"
+							],
+							"query": [
+								{
+									"key": "jam",
+									"value": "{{jam_id}}",
+									"description": "Filtrer par jam"
+								},
+								{
+									"key": "isPublic",
+									"value": "true",
+									"description": "Filtrer par visibilité",
+									"disabled": true
+								},
+								{
+									"key": "author",
+									"value": "{{user_id}}",
+									"description": "Filtrer par auteur",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Lister les soumissions de jeux d'une jam.\n\n🔒 **Authentification requise**\n\n📋 **Filtres disponibles :**\n- jam: ID de la jam\n- isPublic: Visibilité (true/false)\n- author: ID de l'auteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Créer un GameEntry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Mon Super Jeu\",\n  \"description\": \"Un jeu incroyable créé pour cette jam !\",\n  \"jam\": \"/api/jams/{{jam_id}}\",\n  \"teamName\": \"Team Awesome\",\n  \"playUrl\": \"https://mon-jeu.itch.io\",\n  \"mediaUrls\": [\n    \"https://example.com/screenshot1.png\",\n    \"https://example.com/gameplay.gif\"\n  ],\n  \"tags\": [\"puzzle\", \"2D\", \"retro\"],\n  \"isPublic\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/game_entries",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries"
+							]
+						},
+						"description": "Soumettre un jeu à une jam.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'running'\n\n📝 **Champs requis :**\n- title: Titre du jeu\n- description: Description du jeu\n- jam: URI de la jam (/api/jams/{id})\n- playUrl: URL pour jouer au jeu\n\n📝 **Champs optionnels :**\n- teamName: Nom de l'équipe\n- mediaUrls: Screenshots, vidéos\n- tags: Tags descriptifs\n- isPublic: Visibilité (true par défaut)\n\n⚡ L'auteur est automatiquement défini avec l'utilisateur connecté."
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier un GameEntry",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Mon Super Jeu - Version Finale\",\n  \"description\": \"Description mise à jour avec les dernières fonctionnalités !\",\n  \"playUrl\": \"https://mon-jeu-v2.itch.io\",\n  \"mediaUrls\": [\n    \"https://example.com/screenshot1-hd.png\",\n    \"https://example.com/trailer.mp4\"\n  ],\n  \"tags\": [\"puzzle\", \"2D\", \"retro\", \"complete\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/game_entries/{{game_entry_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries",
+								"{{game_entry_id}}"
+							]
+						},
+						"description": "Modifier sa soumission de jeu.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** \n- Être l'auteur du GameEntry\n- La jam doit être en statut 'running'\n\n📝 **Modification possible jusqu'à la fermeture de la jam**"
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer un GameEntry",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/game_entries/{{game_entry_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries",
+								"{{game_entry_id}}"
+							]
+						},
+						"description": "Supprimer sa soumission de jeu.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** \n- Être l'auteur du GameEntry\n- La jam doit être en statut 'running'\n\n⚠️ **Attention :** Suppression définitive"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer les soumissions de jeux (GameEntry) dans les jams."
+		},
+		{
+			"name": "�📋 API Documentation",
 			"item": [
 				{
 					"name": "API Entrypoint",

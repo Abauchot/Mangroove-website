@@ -1,6 +1,6 @@
 # 📬 Guide d'utilisation Postman - API Mangroove
 
-Ce guide vous explique comment utiliser la collection Postman mise à jour pour tester l'API Mangroove avec les fonctionnalités de gestion des utilisateurs et des jams (game jams).
+Ce guide vous explique comment utiliser la collection Postman mise à jour pour tester l'API Mangroove avec les fonctionnalités de gestion des utilisateurs, des jams (game jams) et des soumissions de jeux (GameEntry).
 
 ## 🚀 Configuration initiale
 
@@ -127,13 +127,103 @@ La collection gère automatiquement ces variables :
 
 ### Problèmes courants
 
+## 🔄 Cycle de vie des Jams
+
+Le cycle de vie d'une jam suit cette séquence :
+
+```
+DRAFT → PUBLISHED → RUNNING → CLOSED → ARCHIVED
+```
+
+### 1. Créer une Jam (statut: draft)
+```json
+{
+  "title": "Ma Super Game Jam 2025",
+  "slug": "ma-super-game-jam-2025",
+  "startsAt": "2025-12-01T09:00:00+00:00",
+  "endsAt": "2025-12-03T23:59:59+00:00",
+  "votingEndAt": "2025-12-10T23:59:59+00:00",
+  "themeSubmissionEndAt": "2025-11-25T23:59:59+00:00",
+  "themeVotingEndAt": "2025-11-30T23:59:59+00:00",
+  "theme": "Innovation"
+}
+```
+
+### 2. Publier la Jam (draft → published)
+```http
+POST /api/jams/{{jam_id}}/publish
+```
+
+### 3. Démarrer la Jam (published → running)
+```http
+POST /api/jams/{{jam_id}}/start
+```
+⚡ **Les soumissions de jeux sont maintenant ouvertes !**
+
+### 4. Fermer la Jam (running → closed)
+```http
+POST /api/jams/{{jam_id}}/close
+```
+⚡ **Plus de soumissions, les votes commencent !**
+
+### 5. Archiver la Jam (closed → archived)
+```http
+POST /api/jams/{{jam_id}}/archive
+```
+⚡ **Jam terminée définitivement**
+
+## 🎮 GameEntry (Soumissions de jeux)
+
+### Créer une soumission
+**Prérequis :** La jam doit être en statut `running`
+
+```json
+{
+  "title": "Mon Super Jeu",
+  "description": "Un jeu incroyable créé pour cette jam !",
+  "jam": "/api/jams/{{jam_id}}",
+  "teamName": "Team Awesome",
+  "playUrl": "https://mon-jeu.itch.io",
+  "mediaUrls": [
+    "https://example.com/screenshot1.png",
+    "https://example.com/gameplay.gif"
+  ],
+  "tags": ["puzzle", "2D", "retro"],
+  "isPublic": true
+}
+```
+
+### Opérations disponibles
+- **GET** `/api/game_entries?jam={{jam_id}}` - Lister les soumissions d'une jam
+- **POST** `/api/game_entries` - Créer une soumission
+- **PUT** `/api/game_entries/{{game_entry_id}}` - Modifier sa soumission
+- **DELETE** `/api/game_entries/{{game_entry_id}}` - Supprimer sa soumission
+
+### Règles métier
+✅ **Autorisé :** Modifier/supprimer sa soumission quand jam = `running`
+❌ **Interdit :** Modifier/supprimer quand jam = `closed` ou `archived`
+🔒 **Sécurité :** Seul l'auteur peut modifier sa soumission
+
+## 🛠️ Workflow complet
+
+### Scénario typique
+1. **S'inscrire/Se connecter** → Obtenir le token JWT
+2. **Créer une jam** → Obtenir `{{jam_id}}`
+3. **Publier la jam** → `POST /api/jams/{{jam_id}}/publish`
+4. **Démarrer la jam** → `POST /api/jams/{{jam_id}}/start`
+5. **Soumettre un jeu** → `POST /api/game_entries`
+6. **Modifier sa soumission** → `PUT /api/game_entries/{{game_entry_id}}`
+7. **Fermer la jam** → `POST /api/jams/{{jam_id}}/close`
+8. **Voir les soumissions** → `GET /api/game_entries?jam={{jam_id}}`
+9. **Archiver la jam** → `POST /api/jams/{{jam_id}}/archive`
+
 **❌ 401 Unauthorized**
 - Vérifiez que vous êtes connecté (Login)
 - Le token JWT expire après un certain temps
 
 **❌ 404 Not Found**  
 - Vérifiez que l'ID UUID est correct
-- Utilisez les variables {{user_id}} ou {{jam_id}}
+- Utilisez les variables {{user_id}}, {{jam_id}} ou {{game_entry_id}}
 
 **❌ 422 Validation Error**
 - Vérifiez le format des données JSON
