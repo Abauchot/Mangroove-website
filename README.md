@@ -19,7 +19,13 @@ cd Mangroove-website
 docker compose up --build
 ```
 
-> ✅ Le backend Symfony et le frontend Vue s'initialisent automatiquement au premier lancement (plus besoin de vider de dossier ou d'exécuter une commande à la main).
+### 3. Charger les données de test (optionnel)
+
+```bash
+./load-fixtures.sh
+```
+
+> ✅ Le backend Symfony et le frontend Vue s'initialisent automatiquement au premier lancement. Les fixtures ajoutent des données de test cohérentes pour le développement.
 
 * Frontend : [http://localhost:5173](http://localhost:5173)
 * Backend : [http://localhost:8000/api](http://localhost:8000/api)
@@ -28,11 +34,12 @@ docker compose up --build
 
 ## 🛠️ Structure du projet
 
-```
+```text
 Mangroove-website/
 ├── backend/       # Symfony + API Platform (initialisé et versionné)
 ├── frontend/      # Vue 3 + PrimeVue (initialisé automatiquement)
 ├── docker-compose.yml
+├── load-fixtures.sh  # Script de chargement des données de test
 ```
 
 ---
@@ -49,7 +56,66 @@ Mangroove-website/
 
 ---
 
-## �📖 Documentation utile
+## 🗃️ Gestion des données de test (Fixtures)
+
+**Système de fixtures Symfony pour peupler la base de données avec des données cohérentes.**
+
+### 🚀 Chargement des fixtures
+
+```bash
+# Chargement complet (développement)
+./load-fixtures.sh
+
+# Chargement pour tests
+./load-fixtures.sh test
+```
+
+Le script charge automatiquement les fixtures dans l'ordre correct et affiche un rapport détaillé.
+
+### 📊 Données générées
+
+| Type | Quantité | Description |
+|------|----------|-------------|
+| **Utilisateurs** | 5 | Admin, modérateur et utilisateurs standard |
+| **Jams** | 4 | Différents statuts (draft, published, running, closed) |
+| **GameEntries** | 5 | Jeux avec URLs et différents états |
+| **Commentaires** | 7 | Commentaires modérés et publics |
+
+### 👥 Comptes de test disponibles
+
+```text
+Admin :      admin@mangroove.com / admin123
+Modérateur : moderator@mangroove.com / mod123
+Utilisateur: alice@example.com / alice123
+Utilisateur: bob@example.com / bob123
+Utilisateur: charlie@example.com / charlie123
+```
+
+### 🏗️ Architecture des fixtures
+
+```text
+backend/src/DataFixtures/
+├── UserFixtures.php      # Utilisateurs (ordre 1)
+├── JamFixtures.php       # Game Jams (ordre 2)  
+├── GameEntryFixtures.php # Soumissions (ordre 3)
+└── CommentFixtures.php   # Commentaires (ordre 4)
+```
+
+Chaque fixture implémente `OrderedFixtureInterface` pour garantir le bon ordre de chargement.
+
+### 🛠️ Développement des fixtures
+
+```bash
+# Créer une nouvelle fixture
+docker compose exec backend php bin/console make:fixtures
+
+# Vider et recharger la base
+docker compose exec backend php bin/console doctrine:fixtures:load --no-interaction
+```
+
+---
+
+## 📖 Documentation utile
 
 * Symfony : [https://symfony.com/doc](https://symfony.com/doc)
 * API Platform : [https://api-platform.com/docs/](https://api-platform.com/docs/)
