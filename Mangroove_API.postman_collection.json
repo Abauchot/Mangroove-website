@@ -1,0 +1,958 @@
+{
+	"info": {
+		"name": "Mangroove API",
+		"description": "Collection Postman pour l'API Mangroove avec authentification JWT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "jam_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id", 
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "game_entry_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "comment_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Authentification",
+			"item": [
+				{
+					"name": "Login - Obtenir JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extraire automatiquement le token JWT et le stocker",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.token) {",
+									"        pm.collectionVariables.set('jwt_token', responseJson.token);",
+									"        console.log('✅ Token JWT sauvegardé automatiquement');",
+									"    }",
+									"} else {",
+									"    console.log('❌ Échec de l\\'authentification');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@mangroove.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "Authentification pour obtenir un token JWT.\n\n**Utilisateur de test :**\n- Email: user@mangroove.com\n- Password: password123\n\n⚡ Le token sera automatiquement sauvegardé pour les autres requêtes."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Créer un compte",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nouveau@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "Créer un nouveau compte utilisateur."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints d'authentification pour obtenir et gérer les tokens JWT."
+		},
+		{
+			"name": "👥 Users API",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Récupérer la liste de tous les utilisateurs.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Récupérer un utilisateur spécifique par son ID UUID.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{user_id}} ou remplacez par un UUID valide."
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extraire automatiquement l'ID de l'utilisateur créé et le stocker",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.id) {",
+									"        pm.collectionVariables.set('user_id', responseJson.id);",
+									"        console.log('✅ ID de l\\'utilisateur sauvegardé automatiquement: ' + responseJson.id);",
+									"    }",
+									"} else {",
+									"    console.log('❌ Échec de la création de l\\'utilisateur');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/ld+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nouvel.user@example.com\",\n  \"password\": \"motdepasse123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Créer un nouvel utilisateur via l'API Platform.\n\n🔒 **Authentification requise**\n\n⚡ L'ID de l'utilisateur sera automatiquement sauvegardé pour les autres requêtes."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"email.modifie@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Mettre à jour un utilisateur existant.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{user_id}} ou remplacez par un UUID valide."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Supprimer un utilisateur.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{user_id}} ou remplacez par un UUID valide.\n\n⚠️ **Attention :** Cette action est irréversible."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer les utilisateurs via API Platform."
+		},
+		{
+			"name": "🎯 Jams API",
+			"item": [
+				{
+					"name": "Get All Jams",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							]
+						},
+						"description": "Récupérer la liste de toutes les jams.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jams by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams?status=published",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "published",
+									"description": "Filtrer par statut (draft, published, active, completed, cancelled)"
+								}
+							]
+						},
+						"description": "Filtrer les jams par statut.\n\n🔒 **Authentification requise**\n\n📋 **Statuts disponibles :**\n- draft: Brouillon\n- published: Publiée\n- active: En cours\n- completed: Terminée\n- cancelled: Annulée"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jam by Slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams?slug=nouvelle-game-jam-2025",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							],
+							"query": [
+								{
+									"key": "slug",
+									"value": "nouvelle-game-jam-2025",
+									"description": "Rechercher par slug (identifiant URL-friendly)"
+								}
+							]
+						},
+						"description": "Rechercher une jam par son slug.\n\n🔒 **Authentification requise**\n\n💡 Le slug est l'identifiant URL-friendly de la jam."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jam by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}"
+							]
+						},
+						"description": "Récupérer une jam spécifique par son ID UUID.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{jam_id}} ou remplacez par un UUID valide."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Jam",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extraire automatiquement l'ID de la jam créée et le stocker",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.id) {",
+									"        pm.collectionVariables.set('jam_id', responseJson.id);",
+									"        console.log('✅ ID de la jam sauvegardé automatiquement: ' + responseJson.id);",
+									"    }",
+									"} else {",
+									"    console.log('❌ Échec de la création de la jam');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/ld+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Nouvelle Game Jam 2025\",\n  \"slug\": \"nouvelle-game-jam-2025\",\n  \"startsAt\": \"2025-12-01T09:00:00+00:00\",\n  \"endsAt\": \"2025-12-03T23:59:59+00:00\",\n  \"votingEndAt\": \"2025-12-10T23:59:59+00:00\",\n  \"themeSubmissionEndAt\": \"2025-11-25T23:59:59+00:00\",\n  \"themeVotingEndAt\": \"2025-11-30T23:59:59+00:00\",\n  \"theme\": \"Innovation\",\n  \"status\": \"draft\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jams",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams"
+							]
+						},
+						"description": "Créer une nouvelle jam.\n\n🔒 **Authentification requise**\n\n📝 **Champs requis :**\n- title: Titre de la jam\n- slug: Identifiant unique URL-friendly\n- startsAt: Date de début\n- endsAt: Date de fin\n- votingEndAt: Date de fin des votes\n- themeSubmissionEndAt: Date limite soumission de thèmes\n- themeVotingEndAt: Date limite vote des thèmes\n\n📝 **Champs optionnels :**\n- theme: Thème de la jam (peut être défini plus tard)\n- status: Statut (draft par défaut)\n\n📅 **Format des dates :** ISO 8601 (YYYY-MM-DDTHH:MM:SS+00:00)\n\n⚡ L'ID de la jam sera automatiquement sauvegardé pour les autres requêtes."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Jam",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Game Jam 2025 - Titre Modifié\",\n  \"theme\": \"Nouveau Thème\",\n  \"status\": \"published\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}"
+							]
+						},
+						"description": "Mettre à jour une jam existante.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{jam_id}} ou remplacez par un UUID valide.\n\n📝 Vous pouvez modifier partiellement les champs de la jam."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Jam",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}"
+							]
+						},
+						"description": "Supprimer une jam.\n\n🔒 **Authentification requise**\n\n💡 Utilisez une variable {{jam_id}} ou remplacez par un UUID valide.\n\n⚠️ **Attention :** Cette action est irréversible."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer les jams (game jams) via API Platform."
+		},
+		{
+			"name": "� Cycle de vie des Jams",
+			"item": [
+				{
+					"name": "Publier une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/publish",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"publish"
+							]
+						},
+						"description": "Publier une jam (transition draft → published).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'draft'\n\n📋 **Réponse :** Message de confirmation"
+					},
+					"response": []
+				},
+				{
+					"name": "Démarrer une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"start"
+							]
+						},
+						"description": "Démarrer une jam (transition published → running).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'published'\n\n📋 **Action :** Ouvre les soumissions de jeux"
+					},
+					"response": []
+				},
+				{
+					"name": "Fermer une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/close",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"close"
+							]
+						},
+						"description": "Fermer une jam (transition running → closed).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'running'\n\n📋 **Action :** Ferme les soumissions, ouvre les votes"
+					},
+					"response": []
+				},
+				{
+					"name": "Archiver une Jam",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jams/{{jam_id}}/archive",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jams",
+								"{{jam_id}}",
+								"archive"
+							]
+						},
+						"description": "Archiver une jam (transition closed → archived).\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'closed'\n\n📋 **Action :** Archive définitivement la jam"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer le cycle de vie complet d'une jam : draft → published → running → closed → archived"
+		},
+		{
+			"name": "🎮 GameEntry (Soumissions)",
+			"item": [
+				{
+					"name": "Lister les GameEntry d'une Jam",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/game_entries?jam={{jam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries"
+							],
+							"query": [
+								{
+									"key": "jam",
+									"value": "{{jam_id}}",
+									"description": "Filtrer par jam"
+								},
+								{
+									"key": "isPublic",
+									"value": "true",
+									"description": "Filtrer par visibilité",
+									"disabled": true
+								},
+								{
+									"key": "author",
+									"value": "{{user_id}}",
+									"description": "Filtrer par auteur",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Lister les soumissions de jeux d'une jam.\n\n🔒 **Authentification requise**\n\n📋 **Filtres disponibles :**\n- jam: ID de la jam\n- isPublic: Visibilité (true/false)\n- author: ID de l'auteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Créer un GameEntry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Mon Super Jeu\",\n  \"description\": \"Un jeu incroyable créé pour cette jam !\",\n  \"jam\": \"/api/jams/{{jam_id}}\",\n  \"teamName\": \"Team Awesome\",\n  \"playUrl\": \"https://mon-jeu.itch.io\",\n  \"mediaUrls\": [\n    \"https://example.com/screenshot1.png\",\n    \"https://example.com/gameplay.gif\"\n  ],\n  \"tags\": [\"puzzle\", \"2D\", \"retro\"],\n  \"isPublic\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/game_entries",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries"
+							]
+						},
+						"description": "Soumettre un jeu à une jam.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** La jam doit être en statut 'running'\n\n📝 **Champs requis :**\n- title: Titre du jeu\n- description: Description du jeu\n- jam: URI de la jam (/api/jams/{id})\n- playUrl: URL pour jouer au jeu\n\n📝 **Champs optionnels :**\n- teamName: Nom de l'équipe\n- mediaUrls: Screenshots, vidéos\n- tags: Tags descriptifs\n- isPublic: Visibilité (true par défaut)\n\n⚡ L'auteur est automatiquement défini avec l'utilisateur connecté."
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier un GameEntry",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Mon Super Jeu - Version Finale\",\n  \"description\": \"Description mise à jour avec les dernières fonctionnalités !\",\n  \"playUrl\": \"https://mon-jeu-v2.itch.io\",\n  \"mediaUrls\": [\n    \"https://example.com/screenshot1-hd.png\",\n    \"https://example.com/trailer.mp4\"\n  ],\n  \"tags\": [\"puzzle\", \"2D\", \"retro\", \"complete\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/game_entries/{{game_entry_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries",
+								"{{game_entry_id}}"
+							]
+						},
+						"description": "Modifier sa soumission de jeu.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** \n- Être l'auteur du GameEntry\n- La jam doit être en statut 'running'\n\n📝 **Modification possible jusqu'à la fermeture de la jam**"
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer un GameEntry",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/game_entries/{{game_entry_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"game_entries",
+								"{{game_entry_id}}"
+							]
+						},
+						"description": "Supprimer sa soumission de jeu.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** \n- Être l'auteur du GameEntry\n- La jam doit être en statut 'running'\n\n⚠️ **Attention :** Suppression définitive"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer les soumissions de jeux (GameEntry) dans les jams."
+		},
+		{
+			"name": "💬 Comments API",
+			"item": [
+				{
+					"name": "Lister tous les commentaires",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Sauvegarder l'ID du premier commentaire pour les tests",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson['hydra:member'] && responseJson['hydra:member'].length > 0) {",
+									"        const firstComment = responseJson['hydra:member'][0];",
+									"        const commentId = firstComment.id;",
+									"        pm.collectionVariables.set('comment_id', commentId);",
+									"        console.log('✅ ID du premier commentaire sauvegardé: ' + commentId);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments"
+							]
+						},
+						"description": "Récupérer tous les commentaires accessibles.\n\n🔒 **Authentification requise**\n\n📝 Retourne les commentaires non modérés + vos propres commentaires"
+					},
+					"response": []
+				},
+				{
+					"name": "Lister les commentaires d'un jeu",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments?gameEntry={{game_entry_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments"
+							],
+							"query": [
+								{
+									"key": "gameEntry",
+									"value": "{{game_entry_id}}",
+									"description": "Filtrer par jeu"
+								}
+							]
+						},
+						"description": "Récupérer tous les commentaires d'un jeu spécifique.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** Avoir un game_entry_id valide"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtenir un commentaire",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments/{{comment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments",
+								"{{comment_id}}"
+							]
+						},
+						"description": "Récupérer un commentaire spécifique.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "Créer un commentaire",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Sauvegarder l'ID du commentaire créé",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.id) {",
+									"        pm.collectionVariables.set('comment_id', responseJson.id);",
+									"        console.log('✅ Commentaire créé avec l\\'ID: ' + responseJson.id);",
+									"    }",
+									"} else {",
+									"    console.log('❌ Échec de la création du commentaire');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Super jeu ! J'adore le gameplay et les graphismes. 🎮\",\n  \"gameEntry\": \"/api/game_entries/{{game_entry_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments"
+							]
+						},
+						"description": "Ajouter un commentaire à un jeu.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** \n- Le jeu doit exister\n- Le contenu doit faire entre 1 et 2000 caractères\n\n⚡ **L'auteur est automatiquement défini**"
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier un commentaire",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Super jeu ! J'adore le gameplay et les graphismes. Edit: Vraiment excellent ! 🎮✨\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments/{{comment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments",
+								"{{comment_id}}"
+							]
+						},
+						"description": "Modifier son propre commentaire.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :** \n- Être l'auteur du commentaire\n- Modification possible dans les 15 minutes après création\n- Ou être admin/modérateur"
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer un commentaire",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments/{{comment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments",
+								"{{comment_id}}"
+							]
+						},
+						"description": "Supprimer un commentaire.\n\n🔒 **Authentification requise**\n\n✅ **Autorisations :** \n- Auteur : Peut supprimer son commentaire\n- Modérateur : Peut supprimer dans ses jams\n- Admin : Peut tout supprimer\n\n⚠️ **Attention :** Suppression définitive"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour gérer les commentaires sur les soumissions de jeux."
+		},
+		{
+			"name": "�📋 API Documentation",
+			"item": [
+				{
+					"name": "API Entrypoint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api"
+							]
+						},
+						"description": "Point d'entrée de l'API Platform.\n\n🔒 **Authentification requise**"
+					},
+					"response": []
+				},
+				{
+					"name": "OpenAPI Documentation (JSON)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/docs.json",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"docs.json"
+							]
+						},
+						"description": "Documentation OpenAPI au format JSON."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour accéder à la documentation de l'API."
+		}
+	]
+}

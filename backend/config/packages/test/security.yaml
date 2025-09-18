@@ -1,0 +1,12 @@
+security:
+    # Disable security for test environment
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        api:
+            pattern: ^/api
+            security: false
+        main:
+            pattern: ^/
+            security: false
