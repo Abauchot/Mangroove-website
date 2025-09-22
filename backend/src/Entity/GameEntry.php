@@ -78,12 +78,19 @@ class GameEntry
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'gameEntry')]
     private Collection $comments;
 
+    /**
+     * @var Collection<int, Vote>
+     */
+    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'GameEntry')]
+    private Collection $votes;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->mediaUrls = [];
         $this->tags = [];
         $this->comments = new ArrayCollection();
+        $this->votes = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -292,6 +299,36 @@ class GameEntry
             // set the owning side to null (unless already changed)
             if ($comment->getGameEntry() === $this) {
                 $comment->setGameEntry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Vote>
+     */
+    public function getVotes(): Collection
+    {
+        return $this->votes;
+    }
+
+    public function addVote(Vote $vote): static
+    {
+        if (!$this->votes->contains($vote)) {
+            $this->votes->add($vote);
+            $vote->setGameEntry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVote(Vote $vote): static
+    {
+        if ($this->votes->removeElement($vote)) {
+            // set the owning side to null (unless already changed)
+            if ($vote->getGameEntry() === $this) {
+                $vote->setGameEntry(null);
             }
         }
 

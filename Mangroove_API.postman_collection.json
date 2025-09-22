@@ -758,7 +758,7 @@
 								"comments"
 							]
 						},
-						"description": "Récupérer tous les commentaires accessibles.\n\n🔒 **Authentification requise**\n\n📝 Retourne les commentaires non modérés + vos propres commentaires"
+						"description": "Récupérer tous les commentaires accessibles.\n\n🔒 **Authentification requise**\n\n📝 Visible seulement pendant les jams fermées ou archivées"
 					},
 					"response": []
 				},
@@ -953,6 +953,80 @@
 				}
 			],
 			"description": "Endpoints pour accéder à la documentation de l'API."
+		},
+		{
+			"name": "🗳️ Votes API",
+			"item": [
+				{
+					"name": "Lister tous les votes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/votes",
+							"host": ["{{base_url}}"],
+							"path": ["api", "votes"]
+						},
+						"description": "Récupérer tous les votes accessibles.\n\n🔒 **Authentification requise**\n\n📝 Visible seulement pendant les jams fermées ou archivées"
+					}
+				},
+				{
+					"name": "Voter pour une soumission",
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"if (pm.response.code === 201) {",
+								"    const responseJson = pm.response.json();",
+								"    if (responseJson.id) {",
+								"        pm.collectionVariables.set('vote_id', responseJson.id);",
+								"        console.log('✅ Vote créé avec l\\'ID: ' + responseJson.id);",
+								"    }",
+								"} else {",
+								"    console.log('❌ Échec de la création du vote');",
+								"}"
+							]
+						}
+					}],
+					"request": {
+						"method": "POST",
+						"header": [{
+							"key": "Content-Type",
+							"value": "application/json"
+						}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"gameEntry\": \"/api/game_entries/{{game_entry_id}}\",\n  \"score\": 4\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/votes",
+							"host": ["{{base_url}}"],
+							"path": ["api", "votes"]
+						},
+						"description": "Voter pour une soumission de jeu.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :**\n- La jam doit être en statut 'closed'\n- Ne pas être l'auteur de la soumission\n- Pas de vote existant pour cette soumission\n\n📝 **Score :** Entre 1 et 5"
+					}
+				},
+				{
+					"name": "Modifier un vote",
+					"request": {
+						"method": "PUT",
+						"header": [{
+							"key": "Content-Type",
+							"value": "application/json"
+						}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"score\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/votes/{{vote_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "votes", "{{vote_id}}"]
+						},
+						"description": "Modifier son vote.\n\n🔒 **Authentification requise**\n\n✅ **Prérequis :**\n- Être l'auteur du vote\n- La jam doit être en statut 'closed'"
+					}
+				}
+			]
 		}
 	]
 }
