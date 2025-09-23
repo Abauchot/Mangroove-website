@@ -45,7 +45,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(
     fields: ['gameEntry', 'voter'],
-    message: 'Vous avez déjà voté pour cette soumission.'
+    message: 'You have already voted for this submission.'
 )]
 
 class Vote

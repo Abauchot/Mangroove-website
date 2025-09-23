@@ -334,4 +334,17 @@ class GameEntry
 
         return $this;
     }
+
+    public function getAverageScore(): ?float
+    {
+        $totalVotes = count($this->votes);
+        if ($totalVotes === 0) {
+            return null;
+        }
+        $total = 0;
+        foreach ($this->votes as $vote) {
+            $total += $vote->getScore() ?? 0;
+        }
+        return round ($total / $this->votes->count(), 2);
+    }
 }
