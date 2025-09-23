@@ -82,11 +82,18 @@ class Jam
     #[Groups(['jam:read'])]
     private Collection $gameEntries;
 
+    /**
+     * @var Collection<int, ThemeProposal>
+     */
+    #[ORM\OneToMany(targetEntity: ThemeProposal::class, mappedBy: 'jam_id')]
+    private Collection $themeProposals;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->status = self::STATUS_DRAFT;
         $this->gameEntries = new ArrayCollection();
+        $this->themeProposals = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -274,6 +281,36 @@ class Jam
             // set the owning side to null (unless already changed)
             if ($gameEntry->getJam() === $this) {
                 $gameEntry->setJam(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ThemeProposal>
+     */
+    public function getThemeProposals(): Collection
+    {
+        return $this->themeProposals;
+    }
+
+    public function addThemeProposal(ThemeProposal $themeProposal): static
+    {
+        if (!$this->themeProposals->contains($themeProposal)) {
+            $this->themeProposals->add($themeProposal);
+            $themeProposal->setJamId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeThemeProposal(ThemeProposal $themeProposal): static
+    {
+        if ($this->themeProposals->removeElement($themeProposal)) {
+            // set the owning side to null (unless already changed)
+            if ($themeProposal->getJamId() === $this) {
+                $themeProposal->setJamId(null);
             }
         }
 

@@ -103,12 +103,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'voter')]
     private Collection $votes;
 
+    /**
+     * @var Collection<int, ThemeProposal>
+     */
+    #[ORM\OneToMany(targetEntity: ThemeProposal::class, mappedBy: 'voter_id')]
+    private Collection $themeProposals;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->roles = [self::ROLE_USER];
         $this->comments = new ArrayCollection();
         $this->votes = new ArrayCollection();
+        $this->themeProposals = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -378,6 +385,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($vote->getVoter() === $this) {
                 $vote->setVoter(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ThemeProposal>
+     */
+    public function getThemeProposals(): Collection
+    {
+        return $this->themeProposals;
+    }
+
+    public function addThemeProposal(ThemeProposal $themeProposal): static
+    {
+        if (!$this->themeProposals->contains($themeProposal)) {
+            $this->themeProposals->add($themeProposal);
+            $themeProposal->setVoterId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeThemeProposal(ThemeProposal $themeProposal): static
+    {
+        if ($this->themeProposals->removeElement($themeProposal)) {
+            // set the owning side to null (unless already changed)
+            if ($themeProposal->getVoterId() === $this) {
+                $themeProposal->setVoterId(null);
             }
         }
 
