@@ -4,6 +4,7 @@ namespace App\Controller\Jam;
 
 use App\Entity\Jam;
 use App\Entity\ThemeProposal;
+use App\Repository\JamRepository;
 use App\Repository\ThemeProposalRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,12 +26,13 @@ final class JamThemeTournamentController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
+        private JamRepository $jamRepository,
         private ThemeProposalRepository $themeProposalRepository
     ) {}
 
     public function __invoke(string $id): JsonResponse
     {
-        $jam = $this->em->getRepository(Jam::class)->find($id);
+        $jam = $this->jamRepository->find($id);
 
         if (!$jam) {
             return new JsonResponse(['error' => 'Jam not found'], 404);

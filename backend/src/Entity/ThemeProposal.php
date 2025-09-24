@@ -106,7 +106,6 @@ class ThemeProposal
         $this->id = Uuid::v4();
         $this->createdAt = new \DateTimeImmutable();
         $this->votes = new ArrayCollection();
-        $this->themeVotes = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
