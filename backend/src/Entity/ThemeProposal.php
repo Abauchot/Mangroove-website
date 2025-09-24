@@ -18,8 +18,8 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-#[ApiRessource(
-    opreations: [
+#[ApiResource(
+    operations: [
         new Get(
             security: "is_granted('IS_AUTHENTICATED_FULLY')",
         ),
@@ -50,6 +50,14 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     )]
 class ThemeProposal
 {
+    // Phases du tournoi de thèmes
+    public const PHASE_SUBMISSION = 'submission';    
+    public const PHASE_ELIMINATION = 'elimination';  
+    public const PHASE_QUARTER = 'quarter';          
+    public const PHASE_SEMI = 'semi';               
+    public const PHASE_FINAL = 'final';            
+    public const PHASE_WINNER = 'winner';            
+
     #[ORM\Id]
     #[ORM\Column(type:'uuid', unique: true)]
     #[Groups(['themeProposal:read'])]
@@ -79,13 +87,18 @@ class ThemeProposal
 
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     #[Groups(['themeProposal:read'])]
-    private ?int $score = 0;
+    private int $score = 0;
+
+    #[ORM\Column(type: Types::STRING, length: 20, options: ['default' => self::PHASE_SUBMISSION])]
+    #[Groups(['themeProposal:read'])]
+    private string $phase = self::PHASE_SUBMISSION;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Groups(['themeProposal:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\OneToMany(targetEntity: ThemeVote::class, mappedBy: 'themeProposal', orphanRemoval: true)]
+    #[Groups(['themeProposal:read'])]
     private Collection $votes;
 
     public function __construct()
@@ -93,6 +106,7 @@ class ThemeProposal
         $this->id = Uuid::v4();
         $this->createdAt = new \DateTimeImmutable();
         $this->votes = new ArrayCollection();
+        $this->themeVotes = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -188,5 +202,33 @@ class ThemeProposal
 
     public function updateScore(): void {
         $this->score = $this->votes->count();
+    }
+
+    public function getPhase(): string
+    {
+        return $this->phase;
+    }
+
+    public function setPhase(string $phase): static
+    {
+        $this->phase = $phase;
+        return $this;
+    }
+
+    public function isInPhase(string $phase): bool
+    {
+        return $this->phase === $phase;
+    }
+
+    public function canAdvanceToNextPhase(): bool
+    {
+        return match ($this->phase) {
+            self::PHASE_SUBMISSION => $this->score >= 3, 
+            self::PHASE_ELIMINATION => true, 
+            self::PHASE_QUARTER => true,
+            self::PHASE_SEMI => true,
+            self::PHASE_FINAL => true,
+            default => false,
+        };
     }
 }
