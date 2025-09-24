@@ -85,7 +85,7 @@ class Jam
     /**
      * @var Collection<int, ThemeProposal>
      */
-    #[ORM\OneToMany(targetEntity: ThemeProposal::class, mappedBy: 'jam_id')]
+    #[ORM\OneToMany(targetEntity: ThemeProposal::class, mappedBy: 'jam')]
     private Collection $themeProposals;
 
     public function __construct()

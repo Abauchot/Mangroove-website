@@ -47,7 +47,7 @@ class ThemeVote
     #[Assert\NotNull(message: 'Theme proposal must be provided.')]
     private ?ThemeProposal $themeProposal = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'themeVotes')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['theme_vote:read'])]
     private ?User $voter = null;

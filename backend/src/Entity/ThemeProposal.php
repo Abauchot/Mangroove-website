@@ -69,7 +69,7 @@ class ThemeProposal
     #[Assert\NotNull(message: 'Jam must be provided')]
     private ?Jam $jam = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class,)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'themeProposals')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['themeProposal:read'])]
     private ?User $author = null;

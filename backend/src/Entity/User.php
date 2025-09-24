@@ -98,6 +98,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $comments;
 
     /**
+     * @var Collection<int, GameEntry>
+     */
+    #[ORM\OneToMany(targetEntity: GameEntry::class, mappedBy: 'author')]
+    private Collection $gameEntries;
+
+    /**
      * @var Collection<int, Vote>
      */
     #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'voter')]
@@ -106,13 +112,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, ThemeProposal>
      */
-    #[ORM\OneToMany(targetEntity: ThemeProposal::class, mappedBy: 'voter_id')]
+    #[ORM\OneToMany(targetEntity: ThemeProposal::class, mappedBy: 'author')]
     private Collection $themeProposals;
 
     /**
      * @var Collection<int, ThemeVote>
      */
-    #[ORM\OneToMany(targetEntity: ThemeVote::class, mappedBy: 'voter_id')]
+    #[ORM\OneToMany(targetEntity: ThemeVote::class, mappedBy: 'voter')]
     private Collection $themeVotes;
 
     public function __construct()
@@ -120,6 +126,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->id = Uuid::v4();
         $this->roles = [self::ROLE_USER];
         $this->comments = new ArrayCollection();
+        $this->gameEntries = new ArrayCollection();
         $this->votes = new ArrayCollection();
         $this->themeProposals = new ArrayCollection();
         $this->themeVotes = new ArrayCollection();
@@ -362,6 +369,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($comment->getAuthor() === $this) {
                 $comment->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GameEntry>
+     */
+    public function getGameEntries(): Collection
+    {
+        return $this->gameEntries;
+    }
+
+    public function addGameEntry(GameEntry $gameEntry): static
+    {
+        if (!$this->gameEntries->contains($gameEntry)) {
+            $this->gameEntries->add($gameEntry);
+            $gameEntry->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGameEntry(GameEntry $gameEntry): static
+    {
+        if ($this->gameEntries->removeElement($gameEntry)) {
+            // set the owning side to null (unless already changed)
+            if ($gameEntry->getAuthor() === $this) {
+                $gameEntry->setAuthor(null);
             }
         }
 

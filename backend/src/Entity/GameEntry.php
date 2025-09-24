@@ -81,7 +81,7 @@ class GameEntry
     /**
      * @var Collection<int, Vote>
      */
-    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'GameEntry')]
+    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'gameEntry')]
     private Collection $votes;
 
     public function __construct()

@@ -61,7 +61,7 @@ class Vote
     #[Assert\NotNull(message: 'Game entry must be provided.')]
     private ?GameEntry $gameEntry = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'votes')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['vote:read'])]
     private ?User $voter = null;
