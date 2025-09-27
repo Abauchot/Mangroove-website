@@ -1,10 +1,5 @@
 <template>
-  <a
-    :href="href"
-    class="footer-link"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
+  <a :href="href" class="footer-link" target="_blank" rel="noopener noreferrer">
     <slot />
   </a>
 </template>

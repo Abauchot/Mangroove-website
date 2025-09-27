@@ -1,10 +1,6 @@
 <template>
-  <button
-    class="base-button"
-    :class="[variantClass, { 'full-width': fullWidth }]"
-    :disabled="disabled"
-    @click="$emit('click')"
-  >
+  <button class="base-button" :class="[variantClass, { 'full-width': fullWidth }]" :disabled="disabled"
+    @click="$emit('click')">
     <slot />
   </button>
 </template>

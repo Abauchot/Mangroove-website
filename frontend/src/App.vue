@@ -16,8 +16,14 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 <style scoped>
 .layout {
   display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
   flex-direction: column;
   min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
 }
 
 .page {

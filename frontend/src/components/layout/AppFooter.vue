@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer">
+  <footer class="footer full-width">
     <div class="container">
       <div class="footer-brand">
         <div class="logo">
