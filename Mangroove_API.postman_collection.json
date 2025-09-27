@@ -64,6 +64,16 @@
 			"key": "comment_id",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "forum_thread_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "forum_post_id",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -1027,6 +1037,345 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "🧵 Forum API",
+			"item": [
+				{
+					"name": "📋 Forum Threads",
+					"item": [
+						{
+							"name": "Lister tous les threads",
+							"event": [{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"// Sauvegarder l'ID du premier thread pour les tests",
+										"if (pm.response.code === 200) {",
+										"    const responseJson = pm.response.json();",
+										"    if (responseJson['hydra:member'] && responseJson['hydra:member'].length > 0) {",
+										"        const firstThread = responseJson['hydra:member'][0];",
+										"        const threadId = firstThread.id;",
+										"        pm.collectionVariables.set('forum_thread_id', threadId);",
+										"        console.log('✅ ID du premier thread sauvegardé:', threadId);",
+										"    }",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum_threads",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_threads"]
+								},
+								"description": "Lister tous les threads du forum.\\n\\n🔒 **Authentification requise**\\n\\n📋 **Filtres disponibles :**\\n- isPublic: true/false\\n- jam: ID de la jam\\n- author: ID de l'auteur"
+							}
+						},
+						{
+							"name": "Obtenir un thread par ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum_threads/{{forum_thread_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_threads", "{{forum_thread_id}}"]
+								},
+								"description": "Obtenir les détails d'un thread spécifique.\\n\\n🔒 **Authentification requise**\\n\\n💡 Utilisez la variable {{forum_thread_id}} ou remplacez par un UUID valide."
+							}
+						},
+						{
+							"name": "Créer un nouveau thread",
+							"event": [{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"// Sauvegarder l'ID du thread créé",
+										"if (pm.response.code === 201) {",
+										"    const responseJson = pm.response.json();",
+										"    if (responseJson.id) {",
+										"        pm.collectionVariables.set('forum_thread_id', responseJson.id);",
+										"        console.log('✅ Nouveau thread créé avec ID:', responseJson.id);",
+										"    }",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}],
+							"request": {
+								"method": "POST",
+								"header": [{
+									"key": "Content-Type",
+									"value": "application/json"
+								}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\\n  \\\"title\\\": \\\"Nouveau thread de test\\\",\\n  \\\"author\\\": \\\"/api/users/{{user_id}}\\\",\\n  \\\"isPublic\\\": true\\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/forum_threads",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_threads"]
+								},
+								"description": "Créer un nouveau thread de discussion.\\n\\n🔒 **Authentification requise**\\n\\n📝 **Champs requis :**\\n- title: Titre du thread\\n- author: Référence vers l'utilisateur\\n\\n📝 **Champs optionnels :**\\n- jam: Référence vers une jam\\n- isPublic: Visibilité (défaut: true)"
+							}
+						},
+						{
+							"name": "Créer un thread lié à une jam",
+							"request": {
+								"method": "POST",
+								"header": [{
+									"key": "Content-Type",
+									"value": "application/json"
+								}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\\n  \\\"title\\\": \\\"Discussion - Ma Super Jam 2024\\\",\\n  \\\"author\\\": \\\"/api/users/{{user_id}}\\\",\\n  \\\"jam\\\": \\\"/api/jams/{{jam_id}}\\\",\\n  \\\"isPublic\\\": true\\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/forum_threads",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_threads"]
+								},
+								"description": "Créer un thread lié à une jam spécifique.\\n\\n🔒 **Authentification requise**\\n\\n🎯 **Utilisation :** Thread de discussion dédié à une game jam"
+							}
+						},
+						{
+							"name": "Modifier un thread",
+							"request": {
+								"method": "PATCH",
+								"header": [{
+									"key": "Content-Type",
+									"value": "application/merge-patch+json"
+								}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\\n  \\\"title\\\": \\\"Titre modifié\\\",\\n  \\\"isPublic\\\": false\\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/forum_threads/{{forum_thread_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_threads", "{{forum_thread_id}}"]
+								},
+								"description": "Modifier un thread existant.\\n\\n🔒 **Authentification requise**\\n\\n✅ **Permissions :** Auteur du thread, modérateur ou admin"
+							}
+						},
+						{
+							"name": "Supprimer un thread",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum_threads/{{forum_thread_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_threads", "{{forum_thread_id}}"]
+								},
+								"description": "Supprimer un thread.\\n\\n🔒 **Authentification requise**\\n\\n⚠️ **Attention :** Supprime aussi tous les posts du thread\\n\\n✅ **Permissions :** Auteur du thread, modérateur ou admin"
+							}
+						},
+						{
+							"name": "Épingler/Désépingler un thread",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum/threads/{{forum_thread_id}}/pin",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum", "threads", "{{forum_thread_id}}", "pin"]
+								},
+								"description": "Épingler ou désépingler un thread.\\n\\n🔒 **Authentification requise**\\n\\n✅ **Permissions :** Modérateur ou admin uniquement\\n\\n📌 **Effet :** Les threads épinglés apparaissent en haut des listes"
+							}
+						},
+						{
+							"name": "Verrouiller/Déverrouiller un thread",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum/threads/{{forum_thread_id}}/lock",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum", "threads", "{{forum_thread_id}}", "lock"]
+								},
+								"description": "Verrouiller ou déverrouiller un thread.\\n\\n🔒 **Authentification requise**\\n\\n✅ **Permissions :** Modérateur ou admin uniquement\\n\\n🔒 **Effet :** Les threads verrouillés n'acceptent plus de nouveaux posts"
+							}
+						},
+						{
+							"name": "Obtenir les posts d'un thread",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum/threads/{{forum_thread_id}}/posts",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum", "threads", "{{forum_thread_id}}", "posts"]
+								},
+								"description": "Récupérer tous les posts d'un thread avec hiérarchie.\\n\\n🔒 **Authentification requise**\\n\\n🌳 **Structure :** Posts racines avec leurs réponses imbriquées\\n\\n📊 **Inclut :** Informations du thread, posts avec auteurs, compteurs"
+							}
+						}
+					]
+				},
+				{
+					"name": "💬 Forum Posts",
+					"item": [
+						{
+							"name": "Lister tous les posts",
+							"event": [{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"// Sauvegarder l'ID du premier post pour les tests",
+										"if (pm.response.code === 200) {",
+										"    const responseJson = pm.response.json();",
+										"    if (responseJson['hydra:member'] && responseJson['hydra:member'].length > 0) {",
+										"        const firstPost = responseJson['hydra:member'][0];",
+										"        const postId = firstPost.id;",
+										"        pm.collectionVariables.set('forum_post_id', postId);",
+										"        console.log('✅ ID du premier post sauvegardé:', postId);",
+										"    }",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum_posts",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_posts"]
+								},
+								"description": "Lister tous les posts du forum.\\n\\n🔒 **Authentification requise**\\n\\n📋 **Filtres disponibles :**\\n- thread: ID du thread\\n- author: ID de l'auteur\\n- parent: ID du post parent (pour les réponses)"
+							}
+						},
+						{
+							"name": "Obtenir un post par ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum_posts/{{forum_post_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_posts", "{{forum_post_id}}"]
+								},
+								"description": "Obtenir les détails d'un post spécifique.\\n\\n🔒 **Authentification requise**\\n\\n💡 Utilisez la variable {{forum_post_id}} ou remplacez par un UUID valide."
+							}
+						},
+						{
+							"name": "Créer un nouveau post",
+							"event": [{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"// Sauvegarder l'ID du post créé",
+										"if (pm.response.code === 201) {",
+										"    const responseJson = pm.response.json();",
+										"    if (responseJson.id) {",
+										"        pm.collectionVariables.set('forum_post_id', responseJson.id);",
+										"        console.log('✅ Nouveau post créé avec ID:', responseJson.id);",
+										"    }",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}],
+							"request": {
+								"method": "POST",
+								"header": [{
+									"key": "Content-Type",
+									"value": "application/json"
+								}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\\n  \\\"content\\\": \\\"Voici mon message dans le thread !\\\",\\n  \\\"thread\\\": \\\"/api/forum_threads/{{forum_thread_id}}\\\",\\n  \\\"author\\\": \\\"/api/users/{{user_id}}\\\"\\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/forum_posts",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_posts"]
+								},
+								"description": "Créer un nouveau post dans un thread.\\n\\n🔒 **Authentification requise**\\n\\n📝 **Champs requis :**\\n- content: Contenu du message\\n- thread: Référence vers le thread\\n- author: Référence vers l'utilisateur\\n\\n⚠️ **Limitation :** Thread non verrouillé"
+							}
+						},
+						{
+							"name": "Répondre à un post",
+							"request": {
+								"method": "POST",
+								"header": [{
+									"key": "Content-Type",
+									"value": "application/json"
+								}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\\n  \\\"content\\\": \\\"Excellente question ! Voici ma réponse...\\\",\\n  \\\"thread\\\": \\\"/api/forum_threads/{{forum_thread_id}}\\\",\\n  \\\"author\\\": \\\"/api/users/{{user_id}}\\\",\\n  \\\"parent\\\": \\\"/api/forum_posts/{{forum_post_id}}\\\"\\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/forum_posts",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_posts"]
+								},
+								"description": "Répondre à un post existant.\\n\\n🔒 **Authentification requise**\\n\\n🌳 **Hiérarchie :** Crée une relation parent-enfant\\n\\n📝 **Champ supplémentaire :**\\n- parent: Référence vers le post auquel on répond"
+							}
+						},
+						{
+							"name": "Modifier un post",
+							"request": {
+								"method": "PATCH",
+								"header": [{
+									"key": "Content-Type",
+									"value": "application/merge-patch+json"
+								}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\\n  \\\"content\\\": \\\"Contenu modifié du post...\\\"\\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/forum_posts/{{forum_post_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_posts", "{{forum_post_id}}"]
+								},
+								"description": "Modifier un post existant.\\n\\n🔒 **Authentification requise**\\n\\n✅ **Permissions :** Auteur du post, modérateur ou admin\\n\\n⚠️ **Limitation :** Thread non verrouillé"
+							}
+						},
+						{
+							"name": "Supprimer un post",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum_posts/{{forum_post_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum_posts", "{{forum_post_id}}"]
+								},
+								"description": "Supprimer un post.\\n\\n🔒 **Authentification requise**\\n\\n⚠️ **Attention :** Supprime aussi toutes les réponses à ce post\\n\\n✅ **Permissions :** Auteur du post, modérateur ou admin"
+							}
+						}
+					]
+				},
+				{
+					"name": "📊 Forum Stats & Utils",
+					"item": [
+						{
+							"name": "Statistiques du forum",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/forum/stats",
+									"host": ["{{base_url}}"],
+									"path": ["api", "forum", "stats"]
+								},
+								"description": "Obtenir les statistiques globales du forum.\\n\\n🔒 **Authentification requise**\\n\\n📊 **Inclut :**\\n- Nombre total de threads/posts\\n- Threads les plus actifs\\n- Derniers threads créés\\n- Statistiques par catégorie"
+							}
+						}
+					]
+				}
+			],
+			"description": "Endpoints pour gérer le système de forum avec threads et posts hiérarchiques."
 		}
 	]
 }

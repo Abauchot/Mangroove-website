@@ -253,6 +253,87 @@ POST /api/jams/{{jam_id}}/archive
 ❌ **Interdit :** Modifier après 15 minutes (sauf admin/modo)
 🔒 **Sécurité :** L'auteur est automatiquement défini
 
+## 🧵 API Forum
+
+### Threads de discussion
+
+#### Opérations disponibles
+- **GET** `/api/forum_threads` - Liste tous les threads
+- **GET** `/api/forum_threads/{id}` - Récupère un thread par ID
+- **POST** `/api/forum_threads` - Crée un nouveau thread
+- **PATCH** `/api/forum_threads/{id}` - Met à jour un thread
+- **DELETE** `/api/forum_threads/{id}` - Supprime un thread
+
+#### Endpoints spécialisés
+- **GET** `/api/forum/threads/{id}/posts` - Posts du thread avec hiérarchie
+- **POST** `/api/forum/threads/{id}/pin` - Épingler/désépingler (modérateurs)
+- **POST** `/api/forum/threads/{id}/lock` - Verrouiller/déverrouiller (modérateurs)
+- **GET** `/api/forum/stats` - Statistiques globales du forum
+
+### Posts de forum
+
+#### Opérations disponibles
+- **GET** `/api/forum_posts` - Liste tous les posts
+- **GET** `/api/forum_posts/{id}` - Récupère un post par ID
+- **POST** `/api/forum_posts` - Crée un nouveau post
+- **PATCH** `/api/forum_posts/{id}` - Met à jour un post
+- **DELETE** `/api/forum_posts/{id}` - Supprime un post
+
+### Exemples d'utilisation Forum
+
+#### 1. Créer un thread général
+```json
+{
+  "title": "Recherche coéquipiers pour la prochaine jam",
+  "author": "/api/users/{{user_id}}",
+  "isPublic": true
+}
+```
+
+#### 2. Créer un thread lié à une jam
+```json
+{
+  "title": "Discussion - Strategies pour la Summer Jam",
+  "author": "/api/users/{{user_id}}",
+  "jam": "/api/jams/{{jam_id}}",
+  "isPublic": true
+}
+```
+
+#### 3. Poster un message
+```json
+{
+  "content": "Salut ! Je suis développeur Unity avec 2 ans d'expérience.",
+  "thread": "/api/forum_threads/{{forum_thread_id}}",
+  "author": "/api/users/{{user_id}}"
+}
+```
+
+#### 4. Répondre à un post
+```json
+{
+  "content": "Super ! Moi je suis artiste 2D, on peut faire équipe !",
+  "thread": "/api/forum_threads/{{forum_thread_id}}",
+  "author": "/api/users/{{user_id}}",
+  "parent": "/api/forum_posts/{{forum_post_id}}"
+}
+```
+
+### Variables Forum ajoutées
+- `{{forum_thread_id}}` - ID du thread (auto-rempli)
+- `{{forum_post_id}}` - ID du post (auto-rempli)
+
+### Permissions Forum
+- **Utilisateurs** : Créer threads/posts, modifier ses contenus
+- **Modérateurs** : + épingler/verrouiller threads, modérer
+- **Admins** : Accès complet
+
+### Règles métier Forum
+✅ **Autorisé :** Participer aux discussions publiques
+❌ **Interdit :** Poster dans un thread verrouillé
+🔒 **Sécurité :** Seuls modérateurs/admins peuvent épingler/verrouiller
+🌳 **Hiérarchie :** Système de réponses imbriquées supporté
+
 ## 🛠️ Workflow complet
 
 **❌ 401 Unauthorized**
