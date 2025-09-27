@@ -121,6 +121,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ThemeVote::class, mappedBy: 'voter')]
     private Collection $themeVotes;
 
+    /**
+     * @var Collection<int, ForumThread>
+     */
+    #[ORM\OneToMany(targetEntity: ForumThread::class, mappedBy: 'author')]
+    private Collection $forumThreads;
+
+    /**
+     * @var Collection<int, ForumPost>
+     */
+    #[ORM\OneToMany(targetEntity: ForumPost::class, mappedBy: 'author')]
+    private Collection $forumPosts;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
@@ -130,6 +142,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->votes = new ArrayCollection();
         $this->themeProposals = new ArrayCollection();
         $this->themeVotes = new ArrayCollection();
+        $this->forumThreads = new ArrayCollection();
+        $this->forumPosts = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -366,7 +380,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeComment(Comment $comment): static
     {
         if ($this->comments->removeElement($comment)) {
-            // set the owning side to null (unless already changed)
             if ($comment->getAuthor() === $this) {
                 $comment->setAuthor(null);
             }
@@ -396,7 +409,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeGameEntry(GameEntry $gameEntry): static
     {
         if ($this->gameEntries->removeElement($gameEntry)) {
-            // set the owning side to null (unless already changed)
             if ($gameEntry->getAuthor() === $this) {
                 $gameEntry->setAuthor(null);
             }
@@ -426,7 +438,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeVote(Vote $vote): static
     {
         if ($this->votes->removeElement($vote)) {
-            // set the owning side to null (unless already changed)
             if ($vote->getVoter() === $this) {
                 $vote->setVoter(null);
             }
@@ -456,7 +467,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeThemeProposal(ThemeProposal $themeProposal): static
     {
         if ($this->themeProposals->removeElement($themeProposal)) {
-            // set the owning side to null (unless already changed)
             if ($themeProposal->getVoterId() === $this) {
                 $themeProposal->setVoterId(null);
             }
@@ -486,9 +496,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeThemeVote(ThemeVote $themeVote): static
     {
         if ($this->themeVotes->removeElement($themeVote)) {
-            // set the owning side to null (unless already changed)
             if ($themeVote->getVoterId() === $this) {
                 $themeVote->setVoterId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ForumThread>
+     */
+    public function getForumThreads(): Collection
+    {
+        return $this->forumThreads;
+    }
+
+    public function addForumThread(ForumThread $forumThread): static
+    {
+        if (!$this->forumThreads->contains($forumThread)) {
+            $this->forumThreads->add($forumThread);
+            $forumThread->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeForumThread(ForumThread $forumThread): static
+    {
+        if ($this->forumThreads->removeElement($forumThread)) {
+            if ($forumThread->getAuthor() === $this) {
+                $forumThread->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ForumPost>
+     */
+    public function getForumPosts(): Collection
+    {
+        return $this->forumPosts;
+    }
+
+    public function addForumPost(ForumPost $forumPost): static
+    {
+        if (!$this->forumPosts->contains($forumPost)) {
+            $this->forumPosts->add($forumPost);
+            $forumPost->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeForumPost(ForumPost $forumPost): static
+    {
+        if ($this->forumPosts->removeElement($forumPost)) {
+            if ($forumPost->getAuthor() === $this) {
+                $forumPost->setAuthor(null);
             }
         }
 
