@@ -1,10 +1,12 @@
 <template>
-  <div class="layout">
-    <AppHeader />
-    <main class="page">
-      <router-view />
-    </main>
-    <AppFooter />
+  <div class="app">
+    <div class="layout">
+      <AppHeader />
+      <main class="page">
+        <router-view />
+      </main>
+     <AppFooter />
+    </div>
   </div>
 </template>
 
@@ -16,18 +18,19 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 <style scoped>
 .layout {
   display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
   flex-direction: column;
   min-height: 100vh;
-  width: 100vw;
   margin: 0;
   padding: 0;
+  /* position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw; */
 }
 
 .page {
   flex: 1;
   padding-top: 64px;
 }
+
 </style>

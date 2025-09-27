@@ -49,9 +49,6 @@ import FooterSection from '@/components/ui/FooterSection.vue'
 
 <style scoped>
 .footer {
-  position: fixed;
-  bottom: 0;
-  right: 0;
   width: 100%;
   background-color: var(--color-dark);
   color: var(--color-white);

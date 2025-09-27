@@ -84,7 +84,7 @@ const jam = ref({
 .left {
   display: flex;
   flex-direction: column;
-  min-height: 250PX;
+  min-height: 250px;
   gap: 0.5rem;
 }
 
