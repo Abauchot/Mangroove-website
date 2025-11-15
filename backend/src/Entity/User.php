@@ -97,11 +97,53 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'author')]
     private Collection $comments;
 
+    /**
+     * @var Collection<int, GameEntry>
+     */
+    #[ORM\OneToMany(targetEntity: GameEntry::class, mappedBy: 'author')]
+    private Collection $gameEntries;
+
+    /**
+     * @var Collection<int, Vote>
+     */
+    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'voter')]
+    private Collection $votes;
+
+    /**
+     * @var Collection<int, ThemeProposal>
+     */
+    #[ORM\OneToMany(targetEntity: ThemeProposal::class, mappedBy: 'author')]
+    private Collection $themeProposals;
+
+    /**
+     * @var Collection<int, ThemeVote>
+     */
+    #[ORM\OneToMany(targetEntity: ThemeVote::class, mappedBy: 'voter')]
+    private Collection $themeVotes;
+
+    /**
+     * @var Collection<int, ForumThread>
+     */
+    #[ORM\OneToMany(targetEntity: ForumThread::class, mappedBy: 'author')]
+    private Collection $forumThreads;
+
+    /**
+     * @var Collection<int, ForumPost>
+     */
+    #[ORM\OneToMany(targetEntity: ForumPost::class, mappedBy: 'author')]
+    private Collection $forumPosts;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->roles = [self::ROLE_USER];
         $this->comments = new ArrayCollection();
+        $this->gameEntries = new ArrayCollection();
+        $this->votes = new ArrayCollection();
+        $this->themeProposals = new ArrayCollection();
+        $this->themeVotes = new ArrayCollection();
+        $this->forumThreads = new ArrayCollection();
+        $this->forumPosts = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -338,9 +380,182 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeComment(Comment $comment): static
     {
         if ($this->comments->removeElement($comment)) {
-            // set the owning side to null (unless already changed)
             if ($comment->getAuthor() === $this) {
                 $comment->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GameEntry>
+     */
+    public function getGameEntries(): Collection
+    {
+        return $this->gameEntries;
+    }
+
+    public function addGameEntry(GameEntry $gameEntry): static
+    {
+        if (!$this->gameEntries->contains($gameEntry)) {
+            $this->gameEntries->add($gameEntry);
+            $gameEntry->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGameEntry(GameEntry $gameEntry): static
+    {
+        if ($this->gameEntries->removeElement($gameEntry)) {
+            if ($gameEntry->getAuthor() === $this) {
+                $gameEntry->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Vote>
+     */
+    public function getVotes(): Collection
+    {
+        return $this->votes;
+    }
+
+    public function addVote(Vote $vote): static
+    {
+        if (!$this->votes->contains($vote)) {
+            $this->votes->add($vote);
+            $vote->setVoter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVote(Vote $vote): static
+    {
+        if ($this->votes->removeElement($vote)) {
+            if ($vote->getVoter() === $this) {
+                $vote->setVoter(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ThemeProposal>
+     */
+    public function getThemeProposals(): Collection
+    {
+        return $this->themeProposals;
+    }
+
+    public function addThemeProposal(ThemeProposal $themeProposal): static
+    {
+        if (!$this->themeProposals->contains($themeProposal)) {
+            $this->themeProposals->add($themeProposal);
+            $themeProposal->setVoterId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeThemeProposal(ThemeProposal $themeProposal): static
+    {
+        if ($this->themeProposals->removeElement($themeProposal)) {
+            if ($themeProposal->getVoterId() === $this) {
+                $themeProposal->setVoterId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ThemeVote>
+     */
+    public function getThemeVotes(): Collection
+    {
+        return $this->themeVotes;
+    }
+
+    public function addThemeVote(ThemeVote $themeVote): static
+    {
+        if (!$this->themeVotes->contains($themeVote)) {
+            $this->themeVotes->add($themeVote);
+            $themeVote->setVoterId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeThemeVote(ThemeVote $themeVote): static
+    {
+        if ($this->themeVotes->removeElement($themeVote)) {
+            if ($themeVote->getVoterId() === $this) {
+                $themeVote->setVoterId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ForumThread>
+     */
+    public function getForumThreads(): Collection
+    {
+        return $this->forumThreads;
+    }
+
+    public function addForumThread(ForumThread $forumThread): static
+    {
+        if (!$this->forumThreads->contains($forumThread)) {
+            $this->forumThreads->add($forumThread);
+            $forumThread->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeForumThread(ForumThread $forumThread): static
+    {
+        if ($this->forumThreads->removeElement($forumThread)) {
+            if ($forumThread->getAuthor() === $this) {
+                $forumThread->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ForumPost>
+     */
+    public function getForumPosts(): Collection
+    {
+        return $this->forumPosts;
+    }
+
+    public function addForumPost(ForumPost $forumPost): static
+    {
+        if (!$this->forumPosts->contains($forumPost)) {
+            $this->forumPosts->add($forumPost);
+            $forumPost->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeForumPost(ForumPost $forumPost): static
+    {
+        if ($this->forumPosts->removeElement($forumPost)) {
+            if ($forumPost->getAuthor() === $this) {
+                $forumPost->setAuthor(null);
             }
         }
 

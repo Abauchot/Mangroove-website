@@ -54,6 +54,20 @@ Mangroove-website/
 
 > ⚡ **Authentification automatique** : Le token JWT est géré automatiquement !
 
+### 🆕 Nouveautés Forum dans Postman
+
+La collection inclut maintenant **tous les endpoints du forum** :
+
+* **🧵 Forum Threads** : Création, modification, épinglage, verrouillage
+* **💬 Forum Posts** : Messages et réponses hiérarchiques  
+* **📊 Forum Stats** : Statistiques globales du forum
+* **🔄 Variables auto** : `{{forum_thread_id}}` et `{{forum_post_id}}` remplies automatiquement
+
+**Test rapide recommandé :**
+1. Login → Threads → Créer post → Répondre → Statistiques
+
+> 📊 **Collection complète** : 49 endpoints au total couvrant tout l'écosystème Mangroove !
+
 ---
 
 ## 🗃️ Gestion des données de test (Fixtures)
@@ -112,6 +126,152 @@ docker compose exec backend php bin/console make:fixtures
 # Vider et recharger la base
 docker compose exec backend php bin/console doctrine:fixtures:load --no-interaction
 ```
+
+---
+
+## 🧵 Système de Forum/Threads
+
+Le projet intègre un système de forum complet pour faciliter les discussions entre développeurs lors des game jams.
+
+### 📋 Entités du Forum
+
+1. **ForumThread** (`forum_thread` table)
+   - ID UUID unique, titre du thread
+   - Auteur (relation avec User)
+   - Jam liée (optionnelle, relation avec Jam)
+   - Visibilité publique/privée
+   - Statuts: épinglé, verrouillé, annonce
+   - Timestamps de création/mise à jour
+
+2. **ForumPost** (`forum_post` table)
+   - ID UUID unique, contenu du message
+   - Auteur (relation avec User)
+   - Thread parent (relation avec ForumThread)
+   - Post parent (pour les réponses, auto-référence)
+   - Timestamp de création
+
+### 🛠 API Endpoints Forum
+
+#### Endpoints CRUD automatiques (API Platform)
+
+```http
+GET    /api/forum_threads     # Lister les threads
+POST   /api/forum_threads     # Créer un thread
+GET    /api/forum_threads/{id} # Détail d'un thread
+PATCH  /api/forum_threads/{id} # Modifier un thread
+DELETE /api/forum_threads/{id} # Supprimer un thread
+
+GET    /api/forum_posts       # Lister les posts
+POST   /api/forum_posts       # Créer un post
+GET    /api/forum_posts/{id}  # Détail d'un post
+PATCH  /api/forum_posts/{id}  # Modifier un post
+DELETE /api/forum_posts/{id}  # Supprimer un post
+```
+
+#### Endpoints personnalisés
+
+```http
+GET  /api/forum/threads/{id}/posts # Posts d'un thread avec hiérarchie
+POST /api/forum/threads/{id}/pin   # Épingler/désépingler un thread
+POST /api/forum/threads/{id}/lock  # Verrouiller/déverrouiller un thread
+GET  /api/forum/stats              # Statistiques globales du forum
+```
+
+### 🔐 Permissions Forum
+
+| Action | USER | MODERATOR | ADMIN |
+|--------|------|-----------|-------|
+| Voir threads publics | ✅ | ✅ | ✅ |
+| Créer thread | ✅ | ✅ | ✅ |
+| Poster message | ✅ | ✅ | ✅ |
+| Modifier ses posts | ✅ | ✅ | ✅ |
+| Épingler thread | ❌ | ✅ | ✅ |
+| Verrouiller thread | ❌ | ✅ | ✅ |
+| Supprimer posts autres | ❌ | ✅ | ✅ |
+| Créer annonces | ❌ | ✅ | ✅ |
+
+### 📝 Exemples d'utilisation Forum
+
+#### 1. Créer un nouveau thread
+
+```bash
+curl -X POST http://localhost:8000/api/forum_threads \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Recherche coéquipiers pour la prochaine jam",
+    "author": "/api/users/{USER_ID}",
+    "isPublic": true
+  }'
+```
+
+#### 2. Créer un thread lié à une jam
+
+```bash
+curl -X POST http://localhost:8000/api/forum_threads \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Discussion - Stratégies pour la Game Jam",
+    "author": "/api/users/{USER_ID}",
+    "jam": "/api/jams/{JAM_ID}",
+    "isPublic": true
+  }'
+```
+
+#### 3. Poster un message dans un thread
+
+```bash
+curl -X POST http://localhost:8000/api/forum_posts \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Je suis développeur Unity avec 2 ans d'\''expérience !",
+    "thread": "/api/forum_threads/{THREAD_ID}",
+    "author": "/api/users/{USER_ID}"
+  }'
+```
+
+#### 4. Répondre à un post (système hiérarchique)
+
+```bash
+curl -X POST http://localhost:8000/api/forum_posts \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Moi aussi, on peut faire équipe !",
+    "thread": "/api/forum_threads/{THREAD_ID}",
+    "author": "/api/users/{USER_ID}",
+    "parent": "/api/forum_posts/{PARENT_POST_ID}"
+  }'
+```
+
+#### 5. Récupérer les posts d'un thread avec hiérarchie
+
+```bash
+curl -X GET http://localhost:8000/api/forum/threads/{THREAD_ID}/posts \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 🎯 Fonctionnalités Forum
+
+✅ **Threads hiérarchiques** : Threads avec posts et réponses  
+✅ **Sécurité** : Authentification JWT requise  
+✅ **Permissions** : Contrôle d'accès par rôles  
+✅ **Modération** : Épinglage et verrouillage des threads  
+✅ **Intégration Jams** : Threads liés aux game jams  
+✅ **Réponses imbriquées** : Système de réponses aux posts  
+✅ **API REST complète** : CRUD pour threads et posts  
+✅ **Statistiques** : Service d'analyse de l'activité du forum
+
+### 📊 Données de test Forum
+
+Le système de forum est initialisé avec :
+- **5 threads** de démonstration (annonce, aide technique, discussion jam, showcase, feedback)
+- **10 posts** avec système de réponses hiérarchiques
+- Threads liés aux jams existantes
+- Thread d'annonce épinglé
+- Exemples de discussions techniques et de feedback
 
 ---
 

@@ -78,12 +78,19 @@ class GameEntry
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'gameEntry')]
     private Collection $comments;
 
+    /**
+     * @var Collection<int, Vote>
+     */
+    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'gameEntry')]
+    private Collection $votes;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->mediaUrls = [];
         $this->tags = [];
         $this->comments = new ArrayCollection();
+        $this->votes = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -296,5 +303,48 @@ class GameEntry
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Vote>
+     */
+    public function getVotes(): Collection
+    {
+        return $this->votes;
+    }
+
+    public function addVote(Vote $vote): static
+    {
+        if (!$this->votes->contains($vote)) {
+            $this->votes->add($vote);
+            $vote->setGameEntry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVote(Vote $vote): static
+    {
+        if ($this->votes->removeElement($vote)) {
+            // set the owning side to null (unless already changed)
+            if ($vote->getGameEntry() === $this) {
+                $vote->setGameEntry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getAverageScore(): ?float
+    {
+        $totalVotes = count($this->votes);
+        if ($totalVotes === 0) {
+            return null;
+        }
+        $total = 0;
+        foreach ($this->votes as $vote) {
+            $total += $vote->getScore() ?? 0;
+        }
+        return round ($total / $this->votes->count(), 2);
     }
 }
